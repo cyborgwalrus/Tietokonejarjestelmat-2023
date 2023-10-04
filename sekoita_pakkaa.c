@@ -8,7 +8,7 @@ void shuffle(uint8_t *list, uint16_t list_size);
 int main(){
     uint8_t list[8] = { 1,2,3,4,5,6,7,8};
     shuffle(list,8);
-
+    return 0;
 }
 
 void shuffle(uint8_t *list, uint16_t list_size){
