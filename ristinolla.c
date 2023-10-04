@@ -13,6 +13,7 @@ int main(void)
                              1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                              1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                              1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                             1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                              1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     tictactoe_check(gameboard, 3);
 
@@ -22,10 +23,12 @@ int main(void)
 int8_t tictactoe_check(int8_t *gameboard, int win_len)
 {
     int8_t gameboard_2d[10][10];
-    for (int8_t i = 0; i < 100; i++)
+    for (int8_t i = 0; i < 10; i++)
     {
-        gameboard_2d[i / 10][i % 10] = gameboard[i];
+        for (int8_t j = 0; j < 10; j++){
+            gameboard_2d[i][j] = gameboard[10*i+j];
+        }
     }
-    printf("%i\n", gameboard_2d[0][1]);
+
     return 0;
 }
