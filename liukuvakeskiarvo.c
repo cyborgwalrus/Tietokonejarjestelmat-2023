@@ -19,19 +19,20 @@ void movavg(float *array, uint8_t array_size, uint8_t window_size)
     char tempString[7];
     for (uint8_t i = 0; i <= array_size - window_size; i++)
     {
-        for (uint8_t j = 0; j <= window_size; j++)
+        for (uint8_t j = 0; j < window_size; j++)
         {
             sum += array[i + j];
         }
         sprintf(tempString, "%.02f,", sum / window_size);
-        
-        if(i==0)strcpy(csvString,tempString);
-        else strcat(csvString, tempString);
-        
+
+        if (i == 0)
+            strcpy(csvString, tempString);
+        else
+            strcat(csvString, tempString);
+
         sum = 0;
     }
     csvString[strlen(csvString) - 1] = '\0';
-    
-        printf("%s", csvString);
 
+    printf("%s", csvString);
 }
