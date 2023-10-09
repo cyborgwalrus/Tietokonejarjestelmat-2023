@@ -11,9 +11,9 @@ int8_t tictactoe_check(int8_t* gameboard, int win_len);
 void initialize_2d_gameboard(int8_t* gameboard, int8_t gameboard_2d[10][10]);
 
 bool check_vertical(int8_t gameboard_2d[10][10], int win_len, int8_t player);
-bool check_horizontal(int8_t* gameboard_2d, int win_len, int8_t player);
-bool check_top_left_to_lower_right(int8_t* gameboard_2d, int win_len, int8_t player);
-bool check_top_right_to_lower_left(int8_t* gameboard_2d, int win_len, int8_t player);
+bool check_horizontal(int8_t gameboard_2d[10][10], int win_len, int8_t player);
+bool check_top_left_to_lower_right(int8_t gameboard_2d[10][10], int win_len, int8_t player);
+bool check_top_right_to_lower_left(int8_t gameboard_2d[10][10], int win_len, int8_t player);
 
 int main(void)
 {
@@ -29,9 +29,9 @@ int main(void)
         0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,
     };
-    int8_t wins = tictactoe_check(gameboard, 5);
 
-    return wins;
+
+    return tictactoe_check(gameboard, 5);
 }
 
 void initialize_2d_gameboard(int8_t* gameboard, int8_t gameboard_2d[10][10])
@@ -45,7 +45,7 @@ void initialize_2d_gameboard(int8_t* gameboard, int8_t gameboard_2d[10][10])
     }
 }
 
-bool check_vertical(int8_t gameboard_2d[10][10], int win_len, int8_t player)
+bool check_horizontal(int8_t gameboard_2d[10][10], int win_len, int8_t player)
 {
     for (int8_t i = 0; i < BOARD_HEIGHT; i++)
     {
@@ -68,18 +68,19 @@ bool check_vertical(int8_t gameboard_2d[10][10], int win_len, int8_t player)
     }
     return false;
 }
-bool check_horizontal(int8_t* gameboard_2d, int win_len, int8_t player);
-bool check_top_left_to_lower_right(int8_t* gameboard_2d, int win_len, int8_t player);
-bool check_top_right_to_lower_left(int8_t* gameboard_2d, int win_len, int8_t player);
+bool check_vertical(int8_t gameboard_2d[10][10], int win_len, int8_t player);
+bool check_top_left_to_lower_right(int8_t gameboard_2d[10][10], int win_len, int8_t player);
+bool check_top_right_to_lower_left(int8_t gameboard_2d[10][10], int win_len, int8_t player);
 
 int8_t tictactoe_check(int8_t* gameboard, int win_len)
 {
     int8_t gameboard_2d[10][10] = { 0 };
     initialize_2d_gameboard(gameboard, gameboard_2d);
-    bool risti_wins = check_vertical(gameboard_2d, win_len, RISTI);
-    bool nolla_wins = check_vertical(gameboard_2d, win_len, NOLLA);
+    bool risti_wins = check_horizontal(gameboard_2d, win_len, RISTI);
+    bool nolla_wins = check_horizontal(gameboard_2d, win_len, NOLLA);
 
     if (risti_wins && nolla_wins) return 0;
     if (risti_wins) return 1;
     if (nolla_wins) return 2;
+    return 0;
 }
