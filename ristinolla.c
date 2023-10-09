@@ -2,6 +2,9 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#define RISTI 1
+#define NOLLA 2
+
 int8_t tictactoe_check(int8_t *gameboard, int win_len);
 int8_t gameboard_to_2d(int8_t *gameboard);
 
@@ -31,8 +34,9 @@ int8_t gameboard_to_2d(int8_t *gameboard){
     int8_t gameboard_2d[10][10];
     for (int8_t i = 0; i < 10; i++)
     {
-        for (int8_t j = 0; j < 10; j++){
-            gameboard_2d[i][j] = gameboard[10*i+j];
+        for (int8_t j = 0; j < 10; j++)
+        {
+            gameboard_2d[i][j] = gameboard[10 * i + j];
         }
     }
     return &gameboard_2d;
