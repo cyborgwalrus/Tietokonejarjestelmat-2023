@@ -16,7 +16,7 @@ Kalle Asmundi
 
 ## Suunnitelma
 ### Backend
-1. Käyttäjätunnuksen rekisteröinti ja tamagochin luonti
+1. Käyttäjätunnuksen rekisteröinti ja Tamagotchi luonti
 2. UART yhteyden luominen
 2. EAT, EXERCISE, PET, ACTIVATE komentojen lähetys
 3. id,BEEP viestin vastaanotto
@@ -25,11 +25,11 @@ Kalle Asmundi
 
 ### Anturidata
 #### Liikkeentunnistus
-1. Käytään datarakennetta `struct acceleration_events{bool positive_x, bool negative_x, bool positive_y ...}`
+1. Käytetään datarakennetta `struct acceleration_events{bool positive_x, bool negative_x, bool positive_y ...}`
     1. Kerätään dataa sensoreilta sopivan hitaasti ja lasketaan ajanhetkien välinen muutos.
-    2. Jos muutos ylittää kynnysarvon, vaihdetaan positiiviseksi muutoksen akselia ja suuntaa vastava boolean.
+    2. Jos muutos ylittää kynnysarvon, vaihdetaan positiiviseksi muutoksen akselia ja suuntaa vastaavat Booleanit.
     3. Nukutaan hetki ja nollataan booleanit.
-2. Päätellään `acceleration_events`eistä ja senhetkisestä sensorilukemista millainen liike on menossa
+2. Päätellään `acceleration_events` arvoista ja senhetkisestä sensorilukemista millainen liike on menossa
 3. Liikkeen loputtua lisätään viesti jonoon
 4. Bonus: Virherajojen käyttö
 
