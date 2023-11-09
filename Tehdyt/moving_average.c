@@ -12,7 +12,7 @@ int main(void)
     return 0;
 }
 
-void movavg(float *array, uint8_t array_size, uint8_t window_size)
+void moving_average(float *array, uint8_t array_size, uint8_t window_size)
 {
     float sum = 0;
     char csvString[array_size * 7];
