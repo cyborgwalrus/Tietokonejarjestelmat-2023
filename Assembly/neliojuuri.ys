@@ -33,13 +33,10 @@ loop2:                      # while(bit != 0)
 
 .pos 0x200
 rightshift:                 # %rax = %r14 >> 1
-irmovq $2, %rbx             # constant 2
-irmovq $0x100
-irmovq $-1, %rax
-jmp loop
+irmovq $0x2, %rbx             # bitmask = %bx = 0010
+jmp shiftloop
 rightshift2:                # %rax = %r14 >> 2
-irmovq $4, %rbx             # constant 4
-irmovq $-1, %rax
+irmovq $0x4, %rbx             # bitmask = %bx = 0100
 shiftloop:
     addq %r8, %rax          # %rax++
     subq %rbx, %r14         # %r14 -= %rbx
