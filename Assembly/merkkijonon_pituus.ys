@@ -1,0 +1,35 @@
+.pos 0
+main:
+    irmovq pino,%rsp        # stack pointer
+    irmovq pino,%rbp        # stack start
+    irmovq $0x400, %rdi     # array location in memory to %rdi
+    call string_length
+    halt
+
+.pos 0x100
+string_length:              # while( (*array) != 0 ) %rax++
+    irmovq $8, %r8          # constant 8
+    irmovq $1, %r9          # constant 1
+    irmovq $-1, %rax        # %rax increments before check, it needs to start at -1
+loop:
+    mrmovq (%rdi), %r10     # %r10 = (*array)
+    addq %r9, %rax          # %rax++
+    addq %r8, %rdi          # array++
+    addq %r10, %r10         # (*array) == 0?
+    jne loop                # jump if true
+    ret
+
+.pos 0x200
+pino:                       # stack address
+
+# Test code
+#.pos 0x400
+#.align 8
+#.quad 0x4100000000000000
+#.quad 0x4100000000000000
+#.quad 0x4100000000000000
+#.quad 0x4100000000000000
+#.quad 0x0000000000000000
+
+
+
