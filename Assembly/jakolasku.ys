@@ -1,0 +1,26 @@
+# Test code
+#.pos 0
+#irmovq $25,%rdi
+#irmovq $4,%rsi
+
+
+main:
+    irmovq pino,%rsp    # stack pointer
+    irmovq pino,%rbp    # stack start
+    irmovq $1, %r8 # constant 1
+    irmovq $-1, %rax # loop starts with %rax += 1, so %rax need to start at -1
+    call jakolasku
+    halt
+
+.pos 0x100
+jakolasku:         # %rax = %rdi / %rsi
+loop:
+    addq %r8, %rax # %rax++
+    subq %rsi, %rdi # %rdi -= %rsi
+    jge loop    # jump if %rdi < %%rsi
+    ret
+
+.pos 0x400
+pino:                  # stack addres 
+
+
