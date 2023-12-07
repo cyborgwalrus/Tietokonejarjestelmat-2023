@@ -1,7 +1,7 @@
 # Test Code
 #.pos 0
-#irmovq pino, %rsp    # stack pointer
-#irmovq pino, %rbp    # stack start
+#irmovq pino, %rsp      # stack pointer
+#irmovq pino, %rbp      # stack start
 #irmovq $10, %rax 
 #pushq %rax
 #irmovq $20, %rax
@@ -36,14 +36,14 @@ loop1:                  # %rdi = sum(stack)
     ret
 
 .pos 0x200
-jakolasku:             # %rax = %rdi / %rsi
+jakolasku:              # %rax = %rdi / %rsi
 loop2:
-    addq %r8, %rax     # %rax++
-    subq %rsi, %rdi    # %rdi -= %rsi
-    jge loop2          # jump if %rdi >= %rsi
+    addq %r8, %rax      # %rax++
+    subq %rsi, %rdi     # %rdi -= %rsi
+    jge loop2           # jump if %rdi >= %rsi
     ret
 
 .pos 0x400
-pino:                  # stack address  
+pino:                   # stack address  
 
 
