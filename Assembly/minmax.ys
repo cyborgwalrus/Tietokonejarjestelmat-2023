@@ -1,0 +1,45 @@
+# Test Code
+#.pos 0
+#irmovq pino, %rsp      # stack pointer
+#irmovq pino, %rbp      # stack start
+#irmovq $1, %rax 
+#pushq %rax
+#irmovq $2, %rax
+#pushq %rax
+#irmovq $3, %rax
+#pushq %rax
+#irmovq $4, %rax
+#pushq %rax
+
+main:
+    irmovq $1, %r8      # constant 1
+    call minmax
+    halt
+
+.pos 0x100
+minmax:                 # %rsi = min(stack), %rdi = max(stack)
+    rrmovq %rsp, %rdx   # save return address in %rdx
+    popq %rax           # move stack pointer past the return address
+    irmovq $0x0fffffffffffffff, %rsi # initialize %rsi to max 64-bit so it doesnt get stuck on 0
+loop:
+    popq %rax
+
+    rrmovq %rsi, %rcx   # if(%rax < %rsi) %rsi = %rax
+    subq %rax, %rcx
+    cmovg %rax, %rsi
+
+    rrmovq %rdi, %rcx   # if(%rax > %rdi) %rdi = %rax
+    subq %rax, %rcx
+    cmovl %rax, %rdi    
+
+    rrmovq %rsp, %r9
+    rrmovq %rbp, %r10
+    subq %r9, %r10
+    jne loop           # jump if stack_ptr != stack_start
+    rrmovq %rdx, %rsp  # return stack_ptr to return address
+    ret
+
+.pos 0x400
+pino:                   # stack address  
+
+
