@@ -1,0 +1,49 @@
+# Test Code
+#.pos 0
+#irmovq pino, %rsp    # stack pointer
+#irmovq pino, %rbp    # stack start
+#irmovq $10, %rax 
+#pushq %rax
+#irmovq $20, %rax
+#pushq %rax
+#irmovq $30, %rax
+#pushq %rax
+
+main:
+#    irmovq pino,%rsp   # stack pointer
+#    irmovq pino,%rbp   # stack start
+    irmovq $1, %r8      # constant 1
+    call keskiarvo
+    halt
+
+.pos 0x100
+keskiarvo:              # %rax = average(stack)
+    rrmovq %rsp, %rdx   # save return address in %rdx
+    popq %rax           # move stack pointer past the return address
+
+loop1:                  # %rdi = sum(stack)
+    popq %rax           
+    addq %rax, %rdi     # %rdi += %rax
+    addq %r8, %rsi      # %rsi++
+
+    rrmovq %rsp, %r9
+    rrmovq %rbp, %r10
+    subq %r9, %r10
+    jne loop1           # jump if stack_ptr != stack_start
+    rrmovq %rdx, %rsp   # return stack_ptr to return address
+    irmovq $-1, %rax    # prepare %rax for jakolasku
+    call jakolasku
+    ret
+
+.pos 0x200
+jakolasku:             # %rax = %rdi / %rsi
+loop2:
+    addq %r8, %rax     # %rax++
+    subq %rsi, %rdi    # %rdi -= %rsi
+    jge loop2          # jump if %rdi >= %rsi
+    ret
+
+.pos 0x400
+pino:                  # stack address  
+
+
