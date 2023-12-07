@@ -1,0 +1,25 @@
+# Test code
+#.pos 0
+#irmovq $3, %rdi
+#irmovq $4, %rsi
+
+main:
+    irmovq pino,%rsp    # pino-osoitin
+    irmovq pino,%rbp    # pinon alkuosoite
+    irmovq $1, %r8 # constant 1
+    call kertolasku
+    halt
+
+.pos 0x100
+kertolasku:         # %rax = %rdi * %rsi
+    rrmovq %rdi, %rcx # Copy first argument for looping
+loop:
+    addq %rsi, %rax
+    subq %r8, %rcx
+    jne loop
+    ret
+
+.pos 0x400
+pino:                  # pinon alkuosoite   
+
+
