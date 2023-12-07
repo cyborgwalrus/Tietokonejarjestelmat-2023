@@ -1,0 +1,51 @@
+# TODO: kirjoita bitshift uusiksi. liutua bitmaskia 0x100 vasemmalle
+# Test Code should return %rcx = 48
+.pos 0
+                            # res = %r10
+    irmovq $1, %r11         # bit = %r11 = 1
+    irmovq $2345, %r12      # num = %r12
+
+main:
+    irmovq pino, %rsp       # stack pointer
+    irmovq pino, %rbp       # stack start
+    irmovq $1, %r8          # constant 1
+    call neliojuuri
+    halt
+
+.pos 0x100
+neliojuuri:                 # %rcx = sqrt(%r12)
+loop1:                      # while(bit < num) bit += bit;
+    
+    addq %r11, %r11         # bit += bit
+    # Loop checking
+    rrmovq %r12, %r13       # copy num to %r13
+    subq %r11, %r13
+    jg loop1
+loop2:                      # while(bit != 0)
+
+    # TODO: 
+    # Loop checking
+    rrmovq %r11, %r13       # copy bit to %r13
+    irmovq $0, %r13
+    addq %r13, %r13
+    jne loop2
+    ret
+
+.pos 0x200
+rightshift:                 # %rax = %r14 >> 1
+irmovq $2, %rbx             # constant 2
+irmovq $0x100
+irmovq $-1, %rax
+jmp loop
+rightshift2:                # %rax = %r14 >> 2
+irmovq $4, %rbx             # constant 4
+irmovq $-1, %rax
+shiftloop:
+    addq %r8, %rax          # %rax++
+    subq %rbx, %r14         # %r14 -= %rbx
+    jge shiftloop                # jump if %r14 < %rbx
+    rrmovq %r14, %rax
+    ret
+
+.pos 0x400
+pino:                       # stack address  
