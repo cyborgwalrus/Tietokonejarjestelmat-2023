@@ -1,0 +1,38 @@
+# Test Code
+#.pos 0
+#    irmovq $54362, %r13     # %r13 = 45a, %r14 = d
+
+main:
+    irmovq pino, %rsp       # stack pointer
+    irmovq pino, %rbp       # stack start
+    call valoisuus
+    halt
+
+.pos 0x100
+valoisuus:                  # %r13 = F[11:0], %r14 = E[3:0]
+    irmovq $0xf000, %rdx    # %rdx = bitmask
+
+    rrmovq %r13, %r14       # %r14 = %r13
+    andq %rdx, %r14         # %r14 = %r14 & bitmask
+    
+    call rightshift12       # %r14 >> 12
+
+    irmovq $0x0fff, %rdx    # %rdx = ~bitmask
+    andq %rdx, %r13         # %r13 = %r13 & bitmask
+
+    ret
+
+.pos 0x200
+rightshift12:               # %rax = %r14 >> 12
+irmovq $1, %r8              # constant 1
+irmovq $4096, %rsi          # constant 4096
+irmovq $-1, %rax            # loop starts with %rax += 1, so %rax need to start at -1
+loop:
+    addq %r8, %rax          # %rax++
+    subq %rsi, %r14         # %r14 -= %rsi
+    jge loop                # jump if %r14 < %rsi
+    rrmovq %rax, %r14
+    ret
+
+.pos 0x400
+pino:                       # stack address  
