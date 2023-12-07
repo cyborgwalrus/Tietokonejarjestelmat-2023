@@ -4,8 +4,8 @@
 #irmovq $4, %rsi
 
 main:
-    irmovq pino,%rsp    # pino-osoitin
-    irmovq pino,%rbp    # pinon alkuosoite
+    irmovq pino,%rsp    # stack pointer
+    irmovq pino,%rbp    # stack start
     irmovq $1, %r8 # constant 1
     call kertolasku
     halt
@@ -14,12 +14,12 @@ main:
 kertolasku:         # %rax = %rdi * %rsi
     rrmovq %rdi, %rcx # Copy first argument for looping
 loop:
-    addq %rsi, %rax
-    subq %r8, %rcx
-    jne loop
+    addq %rsi, %rax # %rax += %rsi
+    subq %r8, %rcx  # %rcx--
+    jne loop        # jump if %rcx != 0
     ret
 
 .pos 0x400
-pino:                  # pinon alkuosoite   
+pino:                  # stack address  
 
 
