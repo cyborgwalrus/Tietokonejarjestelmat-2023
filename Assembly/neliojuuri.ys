@@ -3,7 +3,7 @@
 .pos 0
                             # res = %r10
     irmovq $1, %r11         # bit = %r11 = 1
-    irmovq $2345, %r12      # num = %r12
+    irmovq $2, %r12      # num = %r12
 
 main:
     irmovq pino, %rsp       # stack pointer
@@ -11,7 +11,7 @@ main:
     irmovq $1, %r8          # constant 1
 #    call neliojuuri
     rrmovq %r12, %r14
-    call rightshift2
+    call rightshift1
     halt
 
 .pos 0x100
@@ -34,32 +34,30 @@ loop2:                      # while(bit != 0)
     ret
 
 .pos 0x200
-rightshift:                 # %rax = %r14 >> 1
-irmovq $0x2, %rbx           # inputmask = %rbx = 0010
-irmovq $0x1, %rcx           # outputmask = %rcx = 0001
-irmovq $0xfffe,  %rax
-andq %rax, %r14              # zero out lowest bit
-jmp shiftloop
+rightshift1:                 # %rax = %r14 >> 1
+    irmovq $0x2, %rbx       # inputmask = %rbx = 0010
+    irmovq $0xfffe,  %rax
+    andq %rax, %r14         # zero out lowest bit
+    jmp shiftloop_start
 rightshift2:                # %rax = %r14 >> 2
-irmovq $0x4, %rbx           # inputmask = %rbx = 0100
-irmovq $0x1, %rcx           # outputmask = %rcx = 0001
-irmovq $0xfffc,  %rax
-andq %rax, %r14             # zero out 2 lowest bits
-jmp shiftloop
-increment_masks:
-    addq %rbx, %rbx         # inputmask += inputmask
-    addq %rcx, %rcx         # outputmask += outputmask
+    irmovq $0x4, %rbx       # inputmask = %rbx = 0100
+    irmovq $0xfffc,  %rax
+    andq %rax, %r14         # zero out 2 lowest bits
+shiftloop_start:
+    irmovq $0x1, %rcx       # outputmask = %rcx = 0001
+    rrmovq %r14, %r10       # remaining = input
 shiftloop:                  # while(remaining != 0)
     rrmovq %r14, %rax       # var = input
     andq %rbx, %rax         # var &= inputmask
-    je increment_masks      # if(var == false) jump to increment_masks
-    # read bit was 1, save it to output
     addq %rcx, %rdx         # output += outputmask
-    rrmovq %r14, %rax       # remaining = input
-    subq %rdx, %rax         # remaining -= output
     # Loop checking
-    andq %rax, %rax
-    jne increment_masks
+    subq %rbx, %r10         # remaining -= inputmask
+    jle shiftloop_end       # if(remaining < 0) jump to end
+    # Increment masks
+    addq %rbx, %rbx         # inputmask += inputmask
+    addq %rcx, %rcx         # outputmask += outputmask
+    jmp shiftloop
+shiftloop_end:
     rrmovq %rdx, %rax
     ret
 
