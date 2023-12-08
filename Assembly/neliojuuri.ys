@@ -1,4 +1,4 @@
-# TODO: kirjoita bitshift uusiksi. liutua bitmaskia 0x100 vasemmalle
+# TODO: kirjoita bitshift uusiksi. liutua inputmaskia 0x100 vasemmalle
 # Test Code should return %rcx = 48
 .pos 0
                             # res = %r10
@@ -9,7 +9,9 @@ main:
     irmovq pino, %rsp       # stack pointer
     irmovq pino, %rbp       # stack start
     irmovq $1, %r8          # constant 1
-    call neliojuuri
+#    call neliojuuri
+    rrmovq %r12, %r14
+    call rightshift2
     halt
 
 .pos 0x100
@@ -33,15 +35,31 @@ loop2:                      # while(bit != 0)
 
 .pos 0x200
 rightshift:                 # %rax = %r14 >> 1
-irmovq $0x2, %rbx             # bitmask = %bx = 0010
+irmovq $0x2, %rbx           # inputmask = %rbx = 0010
+irmovq $0x1, %rcx           # outputmask = %rcx = 0001
+irmovq $0xfffe,  %rax
+andq %rax, %r14              # zero out lowest bit
 jmp shiftloop
 rightshift2:                # %rax = %r14 >> 2
-irmovq $0x4, %rbx             # bitmask = %bx = 0100
-shiftloop:
-    addq %r8, %rax          # %rax++
-    subq %rbx, %r14         # %r14 -= %rbx
-    jge shiftloop                # jump if %r14 < %rbx
-    rrmovq %r14, %rax
+irmovq $0x4, %rbx           # inputmask = %rbx = 0100
+irmovq $0x1, %rcx           # outputmask = %rcx = 0001
+irmovq $0xfffc,  %rax
+andq %rax, %r14             # zero out 2 lowest bits
+shiftloop:                  # while(remaining != 0)
+    rrmovq %r14, %rax       # var = input
+    andq %rbx, %rax         # var &= inputmask
+    addq %rax, %rdx         # output += var
+    addq %rbx, %rbx         # inputmask += inputmask
+    rrmovq %r14, %rax       # remaining = input
+    subq %rdx, %rax         # remaining -= output
+    # Loop checking
+    andq %rax, %rax
+    jne shiftloop
+    rrmovq %rdx, %rax
+    ret
+
+.pos 0x400
+pino:                       # stack address  
     ret
 
 .pos 0x400
