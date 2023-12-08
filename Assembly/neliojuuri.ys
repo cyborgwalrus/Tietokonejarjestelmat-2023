@@ -1,4 +1,4 @@
-# TODO: kirjoita bitshift uusiksi. liutua inputmaskia 0x100 vasemmalle
+# TODO: bitshift toimii, mutta jää pyörimään kun maski ylittää luvun
 # Test Code should return %rcx = 48
 .pos 0
                             # res = %r10
@@ -45,16 +45,21 @@ irmovq $0x4, %rbx           # inputmask = %rbx = 0100
 irmovq $0x1, %rcx           # outputmask = %rcx = 0001
 irmovq $0xfffc,  %rax
 andq %rax, %r14             # zero out 2 lowest bits
+jmp shiftloop
+increment_masks:
+    addq %rbx, %rbx         # inputmask += inputmask
+    addq %rcx, %rcx         # outputmask += outputmask
 shiftloop:                  # while(remaining != 0)
     rrmovq %r14, %rax       # var = input
     andq %rbx, %rax         # var &= inputmask
-    addq %rax, %rdx         # output += var
-    addq %rbx, %rbx         # inputmask += inputmask
+    je increment_masks      # if(var == false) jump to increment_masks
+    # read bit was 1, save it to output
+    addq %rcx, %rdx         # output += outputmask
     rrmovq %r14, %rax       # remaining = input
     subq %rdx, %rax         # remaining -= output
     # Loop checking
     andq %rax, %rax
-    jne shiftloop
+    jne increment_masks
     rrmovq %rdx, %rax
     ret
 
