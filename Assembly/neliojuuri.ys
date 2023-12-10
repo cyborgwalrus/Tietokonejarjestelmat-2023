@@ -2,26 +2,27 @@
 # Test Code should return %rcx = 48
 .pos 0
                             # res = %r10
+    irmovq $0x10000, %r11   # bit = %r11 = 0x1000
     irmovq $2345, %r12      # num = %r12
 
 main:
     irmovq pino, %rsp       # stack pointer
     irmovq pino, %rbp       # stack start
     irmovq $1, %r8          # constant 1
-    irmovq $1, %r11         # bit = %r11 = 1
     call neliojuuri
     halt
 
 .pos 0x100
 # res=%r10, bit=%r11, num=%r12
 neliojuuri:                 # %rcx = sqrt(num)
-loop1:                      # while(bit < num) bit += bit;
-    
-    addq %r11, %r11         # bit += bit
+loop1:                      # while(bit > num) bit >>= 2;
+    rrmovq %r11, %r14       # var = bit
+    call rightshift2        # var >>= 2
+    rrmovq %r14, %r11       # bit = var
     # Loop checking
     rrmovq %r12, %rax
     subq %r11, %rax
-    jg loop1
+    jle loop1
 loop2:                      # while(bit != 0)
     rrmovq %r10, %rax       # var = res
     addq %r11, %rax         # var += bit
@@ -53,12 +54,12 @@ loop2_end:
     ret
 
 .pos 0x200
-rightshift1:                 # %rax = %r14 >> 1
+rightshift1:                 # %r14 = %r14 >> 1
     irmovq $0x2, %rbx       # inputmask = %rbx = 0010
     irmovq $0xfffffffffffffffe,  %rax
     andq %rax, %r14         # zero out lowest bit
     jmp shiftloop_start
-rightshift2:                # %rax = %r14 >> 2
+rightshift2:                # %r14 = %r14 >> 2
     irmovq $0x4, %rbx       # inputmask = %rbx = 0100
     irmovq $0xfffffffffffffffc,  %rax
     andq %rax, %r14         # zero out 2 lowest bits
@@ -79,7 +80,7 @@ shiftloop:                  # while(remaining != 0)
     addq %rcx, %rcx         # outputmask += outputmask
     jmp shiftloop
 shiftloop_end:
-    rrmovq %r13, %rax
+    rrmovq %r13, %r14
     ret
 
 .pos 0x400
