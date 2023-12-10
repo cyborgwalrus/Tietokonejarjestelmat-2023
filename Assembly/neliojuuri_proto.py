@@ -1,6 +1,6 @@
 res = 0
 bit = 1 << 16
-num = 2345
+num = 1764
 
 print(f"bit:{bit}")
 while(bit > num):
@@ -16,6 +16,7 @@ while(bit<<2 <= num):
 print(f"oma:{bit}")
 
 while (bit != 0):
+   print(f"res:{res}, bit:{bit}")
    if (num >= res + bit):
       num -= res + bit
       res = (res >> 1) + bit

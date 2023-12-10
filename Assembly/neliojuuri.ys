@@ -1,12 +1,12 @@
-# Test Code should return %rcx = 48
+# Test Code should return %rcx = 52
 main:
     irmovq pino, %rsp       # stack pointer
     irmovq pino, %rbp       # stack start
     irmovq $0, %r10         # res = %r10 = 0
     irmovq $1, %r11         # bit = %r11 = 1
-    # test
-    # irmovq $2345, %r12      # num = %r12
-    # test
+# test
+#   irmovq $1764, %r12      # num = %r12
+# test
     call neliojuuri
     halt
 
@@ -28,6 +28,11 @@ loop1:                      # while(bit << 2 <= num):
 
 loop1_return:
 loop2:                      # while(bit != 0)
+#test
+#    rrmovq %r10, %rax
+#    rrmovq %r11, %rcx
+#    brk
+#test
     # if(bit != 0) return
     rrmovq %r11, %rax
     andq %rax, %rax
@@ -36,7 +41,7 @@ loop2:                      # while(bit != 0)
     rrmovq %r10, %rax       # var = res
     addq %r11, %rax         # var += bit
     subq %r12, %rax         # if(num < res + bit) jump to loop2_else
-    jge loop2_else
+    jg loop2_else
 # num -= res + bit
     rrmovq %r10, %rax       # var = res
     addq %r11, %rax         # var += bit
