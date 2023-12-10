@@ -23,27 +23,28 @@ loop1:                      # while(bit < num) bit += bit;
     subq %r11, %rax
     jg loop1
 loop2:                      # while(bit != 0)
-    # var = res
-    # var += bit
-    # if(num < res) jump to loop2_else
+    rrmovq %r10, %rax       # var = res
+    addq %r11, %rax         # var += bit
+    subq %r12, %rax         # if(num < var) jump to loop2_else
+    jl loop2_else
 # num -= res + bit
-    # var = res
-    # var += bit
-    # num -= var
+    rrmovq %r10, %rax       # var = res
+    addq %r11, %rax         # var += bit
+    subq %rax, %r12         # num -= var
 # res = (res >> 1) + bit
-    # var = res
-    # var >>= 1
-    # var += bit
-    # res = var
+    rrmovq %r10, %r14       # var = res
+    call rightshift1        # var >>= 1
+    addq %r11, %r14         # var += bit
+    rrmovq %r14, %r10       # res = var
     jmp loop2_end
 loop2_else:
-    # var = res
-    # var >>= 1
-    # res = var
+    rrmovq %r10, %r14       # var = res
+    call rightshift1        # var >>= 1
+    rrmovq %r14, %r10       # res = var
 loop2_end:
-    # var = bit
-    # var >>= 2
-    # bit = var
+    rrmovq %r11, %r14       # var = bit
+    call rightshift2        # var >>= 2
+    rrmovq %r14, %r11       # bit = var
     # TODO: 
     # Loop checking
     rrmovq %r11, %rax
