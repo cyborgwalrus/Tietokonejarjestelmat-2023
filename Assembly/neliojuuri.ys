@@ -8,7 +8,6 @@
 main:
     irmovq pino, %rsp       # stack pointer
     irmovq pino, %rbp       # stack start
-    irmovq $1, %r8          # constant 1
     call neliojuuri
     halt
 
@@ -66,14 +65,17 @@ rightshift2:                # %r14 = %r14 >> 2
 shiftloop_start:
     irmovq $0x1, %rcx       # outputmask = %rcx = 0001
     rrmovq %r14, %r10       # remaining = input
+    irmovq $0, %r13         # output = 0
 shiftloop:                  # while(remaining != 0)
-    irmovq $0, %rdx         # outputbuffer = 0
+    irmovq $0, %r12         # inputbuffer = 0
+    irmovq $0, %r11         # outputbuffer = 0
     rrmovq %r14, %rax       # var = input
     andq %rbx, %rax         # var &= inputmask
-    cmovne %rcx, %rdx       # if(var != 0) outputbuffer = outputmask
-    addq %rdx, %r13         # output += outputbuffer
+    cmovne %rbx, %r12       # if(var != 0) inputbuffer = inputputmask
+    cmovne %rcx, %r11       # if(var != 0) outputbuffer = outputmask
+    addq %r11, %r13         # output += outputbuffer
     # Loop checking
-    subq %rbx, %r10         # remaining -= inputmask
+    subq %r12, %r10         # remaining -= inputbuffer
     jle shiftloop_end       # if(remaining == 0) jump to end
     # Increment masks
     addq %rbx, %rbx         # inputmask += inputmask
