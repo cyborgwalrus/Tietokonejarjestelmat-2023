@@ -1,13 +1,11 @@
 # TODO: bitshift toimii
 # Test Code should return %rcx = 48
-.pos 0
-                            # res = %r10
-    irmovq $1, %r11   # bit = %r11 = 0x1
-    irmovq $2345, %r12      # num = %r12
-
 main:
     irmovq pino, %rsp       # stack pointer
     irmovq pino, %rbp       # stack start
+    irmovq $0, %r10         # res = %r10 = 0
+    irmovq $1, %r11         # bit = %r11 = 1
+    irmovq $2345, %r12      # num = %r12
     call neliojuuri
     halt
 
@@ -56,7 +54,7 @@ loop2_end:
     rrmovq %r14, %r11       # bit = var
     jmp loop2
 loop2_return:
-    %rrmovq %r10, %rcx
+    rrmovq %r10, %rcx
     ret
 
 .pos 0x200
