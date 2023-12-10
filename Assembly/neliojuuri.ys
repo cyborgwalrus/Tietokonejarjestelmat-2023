@@ -1,11 +1,12 @@
-# TODO: bitshift toimii
 # Test Code should return %rcx = 48
 main:
     irmovq pino, %rsp       # stack pointer
     irmovq pino, %rbp       # stack start
     irmovq $0, %r10         # res = %r10 = 0
     irmovq $1, %r11         # bit = %r11 = 1
-    irmovq $2345, %r12      # num = %r12
+    # test
+    # irmovq $2345, %r12      # num = %r12
+    # test
     call neliojuuri
     halt
 
@@ -13,26 +14,28 @@ main:
 # res=%r10, bit=%r11, num=%r12
 neliojuuri:                 # %rcx = sqrt(num)
 loop1:                      # while(bit << 2 <= num):
-    # Loop checking
+    # if(bit << 2 <= num) break
     rrmovq %r11, %rax       # var = bit
     addq %rax, %rax         # var <<= 2
     addq %rax, %rax       
     rrmovq %r12, %rbx       # var2 = num
     subq %rax, %rbx         # var2 -= bit << 2
     jle loop1_return
-    rrmovq %rax, %r11       # bit = var
+    # bit <<= 2
+    addq %r11, %r11        
+    addq %r11, %r11
     jmp loop1
 
 loop1_return:
 loop2:                      # while(bit != 0)
-    # Loop checking
+    # if(bit != 0) return
     rrmovq %r11, %rax
     andq %rax, %rax
     je loop2_return
     # if (num >= res + bit)
     rrmovq %r10, %rax       # var = res
     addq %r11, %rax         # var += bit
-    subq %r12, %rax         # if(num < var) jump to loop2_else
+    subq %r12, %rax         # if(num < res + bit) jump to loop2_else
     jge loop2_else
 # num -= res + bit
     rrmovq %r10, %rax       # var = res
@@ -45,10 +48,12 @@ loop2:                      # while(bit != 0)
     rrmovq %r14, %r10       # res = var
     jmp loop2_end
 loop2_else:
+    # res >>= 1
     rrmovq %r10, %r14       # var = res
     call rightshift1        # var >>= 1
     rrmovq %r14, %r10       # res = var
 loop2_end:
+    # bit >>= 2
     rrmovq %r11, %r14       # var = bit
     call rightshift2        # var >>= 2
     rrmovq %r14, %r11       # bit = var
@@ -59,31 +64,33 @@ loop2_return:
 
 .pos 0x200
 # initialize bitmasks and zero bits that would shift past 0
-rightshift1:                # %r14 = %r14 >> 1
+rightshift1:                # result = %r14 >>= 1
     irmovq $0x2, %rbx       # inputmask = %rbx = 0010
     irmovq $0xfffffffffffffffe,  %rax
     andq %rax, %r14         # zero lowest bit
     jmp shiftloop_start
-rightshift2:                # %r14 = %r14 >> 2
+rightshift2:                # result = %r14 >>= 2
     irmovq $0x4, %rbx       # inputmask = %rbx = 0100
     irmovq $0xfffffffffffffffc,  %rax
     andq %rax, %r14         # zero 2 lowest bits
 
 shiftloop_start:
-    irmovq $0x1, %rcx       # outputmask = %rcx = 0001
-    rrmovq %r14, %r10       # remaining = input
+    # if(result == 0) return 0
     irmovq $0, %r13         # output = 0
+    je shiftloop_return
+    irmovq $0x1, %rcx       # outputmask = %rcx = 0001
+    rrmovq %r14, %r9       # remaining = input
 shiftloop:                  # while(remaining != 0)
-    irmovq $0, %r12         # inputbuffer = 0
-    irmovq $0, %r11         # outputbuffer = 0
+    irmovq $0, %rsi         # inputbuffer = 0
+    irmovq $0, %rdi         # outputbuffer = 0
     rrmovq %r14, %rax       # var = input
     andq %rbx, %rax         # var &= inputmask
-    cmovne %rbx, %r12       # if(var != 0) inputbuffer = inputputmask
-    cmovne %rcx, %r11       # if(var != 0) outputbuffer = outputmask
-    addq %r11, %r13         # output += outputbuffer
-    # Loop checking
-    subq %r12, %r10         # remaining -= inputbuffer
-    jle shiftloop_return    # if(remaining == 0) jump to end
+    cmovne %rbx, %rsi       # if(var != 0) inputbuffer = inputputmask
+    cmovne %rcx, %rdi       # if(var != 0) outputbuffer = outputmask
+    addq %rdi, %r13         # output += outputbuffer
+    # if(remaining == 0) return
+    subq %rsi, %r9         # remaining -= inputbuffer
+    jle shiftloop_return    
     # Increment masks
     addq %rbx, %rbx         # inputmask += inputmask
     addq %rcx, %rcx         # outputmask += outputmask
