@@ -1,42 +1,43 @@
 main:
     irmovq pino, %rsp       # stack pointer
     irmovq pino, %rbp       # stack start
-    
+#test
+#    irmovq $99, %r12
+#    irmovq $99, %r11
+#test
     call tehokertolasku
     halt
 
-.pos 100
-tehokertolasku: # %r14 = %r14 * %r13
+.pos 0x100
+tehokertolasku:            # %rax = %r11 * %r12
     # initialize variables
-    irmovq $1, %rbx # bitmask = 0b1
-    irmovq $0, %rdi # output = 0
-    rrmovq %r13, %rsi # remaining = num2
-    irmovq %r14, %rcx # bitshifted_num1 = num1
-    # process 
+    irmovq $1, %rbx        # bitmask = 0b1
+    irmovq $0, %rdi        # output = 0
+    rrmovq %r12, %rsi      # remaining = num2
+    rrmovq %r11, %rcx      # bitshifted_num1 = num1 
 tehokertolasku_loop: # while(remaining != 0):
     rrmovq %rsi, %rax
     andq %rax, %rax
     je tehokertolasku_return
     # read a bit using bitmask
-    rrmovq %r13, %rax # variable = num2
-    andq %rbx, %rax # variable = bitmask & variable
-    je process_remaining_and_bitshifts
-    # if(variable != 0) add bitshifted_num1 to output
-    addq %rcx, %rdi # output = bitshifted_num1 + output
-process_remaining_and_bitshifts:
-    # invert bitmask
-    irmovq $0, %rax # variable = 0
-    subq %rbx, %rax # bitmask = variable - bitmask
-    # remove processed bit from remaining
-    andq %rbx, %rsi # remaining = bitmask & remaining
-    # invert bitmask again
-    subq %rbx, %rax # bitmask = variable - bitmask
+    rrmovq %r12, %rax     # variable = num2
+    andq %rbx, %rax       # variable = bitmask & variable
+    je process_remaining
+    # if(variable != 0): add bitshifted_num1 to output
+    addq %rcx, %rdi       # output = bitshifted_num1 + output
+process_remaining:
+    rrmovq %rbx, %rax
+    andq %r12, %rax
+    je process_bitshifts
+    # if(remaining & bitmask != 0): remove processed bit from remaining
+    subq %rbx, %rsi      # remaining =  remaining - bitmask
+process_bitshifts:
     # bitshift bitmask and bitshifted_num1 to the left
-    addq %rbx, %rbx # bitmask = bitmask + bitmask
-    addq %rcx, %rcx # bitshifted_num1 = bitshifted_num1 + bitshifted_num1
+    addq %rbx, %rbx      # bitmask = bitmask + bitmask
+    addq %rcx, %rcx      # bitshifted_num1 = bitshifted_num1 + bitshifted_num1
     jmp tehokertolasku_loop
 tehokertolasku_return:
-    rrmovq %rdi, %r14
+    rrmovq %rdi, %rax
 
-.pos 400
-pino
+.pos 0x400
+pino:

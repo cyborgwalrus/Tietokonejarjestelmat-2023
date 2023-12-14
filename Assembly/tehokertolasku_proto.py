@@ -13,13 +13,9 @@ def kertolasku(num1, num2):
             output = bitshifted_num1 + output
     
     # process remaining
-        # invert bitmask
-        variable = 0
-        bitmask = variable - bitmask
-        # remove processed bit from remaining
-        remaining = bitmask & remaining
-        # invert bitmask again
-        bitmask = variable - bitmask
+        if(remaining & bitmask != 0):
+            # remove processed bit from remaining
+            remaining =  remaining - bitmask
     # bitshift bitmask and bitshifted_num1
         # increment bitmask
         bitmask = bitmask + bitmask
