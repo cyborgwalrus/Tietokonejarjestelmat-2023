@@ -1,0 +1,165 @@
+# TODO: Main
+# TODO: Siivoa multiplication
+# TODO: Siivoa square root
+main:
+    irmovq pino, %rsp       # stack pointer
+    irmovq pino, %rbp       # stack start
+#test
+#    irmovq $99, %r12
+#    irmovq $99, %r11
+#test
+    call multiplication
+    halt
+
+#####################
+# Multiplication
+#####################
+# Multiplies together the numbers in r11 and r12 
+# Input: %r11, %r12
+# Output: %rax
+# Used registers: rax, rbx, rcx, rdi, rsi, r11, r12
+# TODO: Vähennä käytettyjen registerien määrää
+# TODO: Muuta input ja output rekisterit
+#####################
+.pos 0x100
+multiplication:            # %rax = %r11 * %r12
+    # initialize variables
+    irmovq $1, %rbx        # bitmask = 0b1
+    irmovq $0, %rdi        # output = 0
+    rrmovq %r12, %rsi      # remaining = num2
+    rrmovq %r11, %rcx      # bitshifted_num1 = num1 
+multiplication_loop: # while(remaining != 0):
+    rrmovq %rsi, %rax
+    andq %rax, %rax
+    je multiplication_return
+    # read a bit using bitmask
+    rrmovq %r12, %rax     # variable = num2
+    andq %rbx, %rax       # variable = bitmask & variable
+    je process_remaining
+    # if(variable != 0): add bitshifted_num1 to output
+    addq %rcx, %rdi       # output = bitshifted_num1 + output
+process_remaining:
+    rrmovq %rbx, %rax
+    andq %r12, %rax
+    je process_bitshifts
+    # if(remaining & bitmask != 0): remove processed bit from remaining
+    subq %rbx, %rsi      # remaining =  remaining - bitmask
+process_bitshifts:
+    # bitshift bitmask and bitshifted_num1 to the left
+    addq %rbx, %rbx      # bitmask = bitmask + bitmask
+    addq %rcx, %rcx      # bitshifted_num1 = bitshifted_num1 + bitshifted_num1
+    jmp multiplication_loop
+multiplication_return:
+    rrmovq %rdi, %rax
+
+
+#####################
+# Square root
+#####################
+# Calculates the square root of the number in %r12 
+# Input: %r12
+# Output: %rcx
+# Used registers: rax, rbx, rcx, r10, r11, r12, 14
+# TODO: Vähennä käytettyjen registerien määrää
+# TODO: Muuta input ja output rekisterit
+#####################
+.pos 0x200
+# res=%r10, bit=%r11, num=%r12
+neliojuuri:                 # %rcx = sqrt(num)
+loop1:                      # while(bit << 2 <= num):
+    # if(bit << 2 <= num) break
+    rrmovq %r11, %rax       # var = bit
+    addq %rax, %rax         # var <<= 2
+    addq %rax, %rax       
+    rrmovq %r12, %rbx       # var2 = num
+    subq %rax, %rbx         # var2 -= bit << 2
+    jle loop1_return
+    # bit <<= 2
+    addq %r11, %r11        
+    addq %r11, %r11
+    jmp loop1
+
+loop1_return:
+loop2:                      # while(bit != 0)
+    # if(bit != 0) return
+    rrmovq %r11, %rax
+    andq %rax, %rax
+    je loop2_return
+    # if (num >= res + bit)
+    rrmovq %r10, %rax       # var = res
+    addq %r11, %rax         # var += bit
+    subq %r12, %rax         # if(num < res + bit) jump to loop2_else
+    jg loop2_else
+# num -= res + bit
+    rrmovq %r10, %rax       # var = res
+    addq %r11, %rax         # var += bit
+    subq %rax, %r12         # num -= var
+# res = (res >> 1) + bit
+    rrmovq %r10, %r14       # var = res
+    call rightshift1        # var >>= 1
+    addq %r11, %r14         # var += bit
+    rrmovq %r14, %r10       # res = var
+    jmp loop2_end
+loop2_else:
+    # res >>= 1
+    rrmovq %r10, %r14       # var = res
+    call rightshift1        # var >>= 1
+    rrmovq %r14, %r10       # res = var
+loop2_end:
+    # bit >>= 2
+    rrmovq %r11, %r14       # var = bit
+    call rightshift2        # var >>= 2
+    rrmovq %r14, %r11       # bit = var
+    jmp loop2
+loop2_return:
+    rrmovq %r10, %rcx
+    ret
+
+#############################
+# Rightshift1 and Rightshift2
+#############################
+# Bitshifts the number in %r14 to the right by 1 or 2 bits
+# Input: %r14
+# Output: %r14
+# Used registers: rax, rbx, rcx, rdi, rsi, r9, r13, r14
+# TODO: Vähennä käytettyjen registerien määrää
+#############################
+.pos 0x300
+# initialize bitmasks and zero bits that would shift past 0
+rightshift1:                # %r14 >>= 1
+    irmovq $0x2, %rbx       # inputmask = %rbx = 0010
+    irmovq $0xfffffffffffffffe,  %rax
+    andq %rax, %r14         # zero lowest bit
+    jmp shiftloop_start
+rightshift2:                # %r14 >>= 2
+    irmovq $0x4, %rbx       # inputmask = %rbx = 0100
+    irmovq $0xfffffffffffffffc,  %rax
+    andq %rax, %r14         # zero 2 lowest bits
+
+shiftloop_start:
+    # if(result == 0) return 0
+    irmovq $0, %r13         # output = 0
+    je shiftloop_return
+    irmovq $0x1, %rcx       # outputmask = %rcx = 0001
+    rrmovq %r14, %r9       # remaining = input
+shiftloop:                  # while(remaining != 0)
+    irmovq $0, %rsi         # inputbuffer = 0
+    irmovq $0, %rdi         # outputbuffer = 0
+    rrmovq %r14, %rax       # var = input
+    andq %rbx, %rax         # var &= inputmask
+    cmovne %rbx, %rsi       # if(var != 0) inputbuffer = inputputmask
+    cmovne %rcx, %rdi       # if(var != 0) outputbuffer = outputmask
+    addq %rdi, %r13         # output += outputbuffer
+    # if(remaining == 0) return
+    subq %rsi, %r9         # remaining -= inputbuffer
+    jle shiftloop_return    
+    # Increment masks
+    addq %rbx, %rbx         # inputmask += inputmask
+    addq %rcx, %rcx         # outputmask += outputmask
+    jmp shiftloop
+shiftloop_return:
+    rrmovq %r13, %r14
+    ret
+
+.pos 0x400
+pino:                       # stack address  
