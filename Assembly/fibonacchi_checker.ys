@@ -28,20 +28,20 @@ main:
 
 #####################################################
 # Multiplication
-# %rax = %r14 * %r13
+# %r14 = %r14 * %r13
 #####################################################
 # Multiplies together the numbers in r14 and r13
 # using peasant binary algorithm
 ##################################################### 
 # Input: %r14, %r13
-# Output: %rax
+# Output: %r14
 # Used registers: rax, rbx, rcx, rdi, rsi, r14, r13
 # TODO: Vähennä käytettyjen registerien määrää
 # TODO: Muuta input ja output rekisterit
 # TODO: Varmista että suurempi luku on r14
 #####################################################
 .pos 0x100
-multiply_r14_r13:            # %rax = %r14 * %r13
+multiply_r14_r13:            # %r14 = %r14 * %r13
     # initialize variables
     irmovq $1, %rbx        # bitmask = 0b1
     irmovq $0, %rdi        # output = 0
@@ -69,7 +69,7 @@ process_bitshifts:
     addq %rcx, %rcx      # bitshifted_num1 = bitshifted_num1 + bitshifted_num1
     jmp multiplication_loop
 multiplication_return:
-    rrmovq %rdi, %rax
+    rrmovq %rdi, %r14
 
 
 
@@ -140,27 +140,27 @@ loop2_return:
     ret
 
 ###########################################################
-# Rightshift1
+# rightshift1_r14
 # %r14 = %r14 << 1
 ###########################################################
-# Rightshift2
+# rightshift2_r14
 # %r14 = %r14 << 2
 ###########################################################
 # Bitshifts the number in %r14 to the right by 1 or 2 bits
 ###########################################################
 # Input: %r14
 # Output: %r14
-# Used registers: rax, rbx, rcx, rdi, rsi, r9, r13, r14
+# Used registers: rax, rbx, rcx, rdx, rdi, rsi,  r13, r14
 # TODO: Vähennä käytettyjen registerien määrää
 ###########################################################
 .pos 0x300
 # initialize bitmasks and zero bits that would shift past 0
-rightshift1:                # %r14 >>= 1
+rightshift1_r14:                # %r14 >>= 1
     irmovq $0x2, %rbx       # inputmask = %rbx = 0010
     irmovq $0xfffffffffffffffe,  %rax
     andq %rax, %r14         # zero lowest bit
     jmp shiftloop_start
-rightshift2:                # %r14 >>= 2
+rightshift2_r14:                # %r14 >>= 2
     irmovq $0x4, %rbx       # inputmask = %rbx = 0100
     irmovq $0xfffffffffffffffc,  %rax
     andq %rax, %r14         # zero 2 lowest bits
@@ -170,7 +170,7 @@ shiftloop_start:
     irmovq $0, %r13         # output = 0
     je shiftloop_return
     irmovq $0x1, %rcx       # outputmask = %rcx = 0001
-    rrmovq %r14, %r9       # remaining = input
+    rrmovq %r14, %rdx       # remaining = input
 shiftloop:                  # while(remaining != 0)
     irmovq $0, %rsi         # inputbuffer = 0
     irmovq $0, %rdi         # outputbuffer = 0
@@ -180,7 +180,7 @@ shiftloop:                  # while(remaining != 0)
     cmovne %rcx, %rdi       # if(var != 0) outputbuffer = outputmask
     addq %rdi, %r13         # output += outputbuffer
     # if(remaining == 0) return
-    subq %rsi, %r9         # remaining -= inputbuffer
+    subq %rsi, %rdx         # remaining -= inputbuffer
     jle shiftloop_return    
     # Increment masks
     addq %rbx, %rbx         # inputmask += inputmask
