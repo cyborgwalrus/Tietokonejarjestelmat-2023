@@ -1,19 +1,12 @@
 # TODO: Main
-# TODO: isFibonacchi_r13 palauttaa aina 0, syynä square root?
-# TODO: square rootissa bugeja, sqrt(9) = 0???
-# TODO: Valitse rekisterit uusiksi niin että ne eivät varmasti mene ristiin
 #####################################################
 # General Registers: 
-# (Temporary registers used by functions internally)
-# %rax, %rcx, %rdx, %rbx ,%rsi, %rdi
+# (Registers used by functions)
+# %rax, %rcx, %rdx, %rbx ,%rsi, %rdi, %r8, %r9, %r10, %r11, %r12
 #####################################################
 # Input/Output Registers:
 # (Arguments for function calls)
-# %r14, %r13, %r12, %r11, %r10
-#####################################################
-# Main Registers:
-# (For variables and constants used by Main)
-# %r8, %r9 
+# %r14, %r13
 #####################################################
 main:
     irmovq pino, %rsp       # stack pointer
@@ -89,14 +82,14 @@ r13_r13_5: # %r13 = %r13 * %r13 * 5
 #####################################################
 .pos 0x200
 isPerfectSquare_r13:
-    rrmovq %r13, %r10        # var = input
+    rrmovq %r13, %r8        # var = input
     call square_root_r13     # arg1 = sqrt(input)
     rrmovq %r13, %r14        # arg2 = arg1
     call multiply_r13_r14    # arg2 = arg1 * arg2
     
     # if(var == arg1 * arg2) return 1
     # else return 0 
-    subq %r14, %r10
+    subq %r14, %r8
     je r13_is_perfect_square
 r13_is_not_perfect_square:
     irmovq $0, %r13
@@ -159,7 +152,7 @@ multiplication_return:
 ###################################################
 # Input: %r13
 # Output: %r13
-# Used registers: rax, rbx, rcx, rdx, r13, 14
+# Used registers: rax, rbx, rcx, rdx, r11, r12, r13, 14
 # TODO: Vähennä käytettyjen registerien määrää
 ###################################################
 .pos 0x400
@@ -175,7 +168,7 @@ loop1:                      # while(bit << 2 <= num):
     addq %rax, %rax       
     rrmovq %r13, %rbx       # var2 = num
     subq %rax, %rbx         # var2 -= bit << 2
-    jle loop1_return
+    jl loop1_return
     # bit <<= 2
     addq %r12, %r12        
     addq %r12, %r12
@@ -257,7 +250,7 @@ shiftloop:                  # while(remaining != 0)
     andq %rbx, %rax         # var &= inputmask
     cmovne %rbx, %rsi       # if(var != 0) inputbuffer = inputputmask
     cmovne %rcx, %rdi       # if(var != 0) outputbuffer = outputmask
-    addq %rdi, %r13         # output += outputbuffer
+    addq %rdi, %r10         # output += outputbuffer
     # if(remaining == 0) return
     subq %rsi, %rdx         # remaining -= inputbuffer
     jle shiftloop_return    

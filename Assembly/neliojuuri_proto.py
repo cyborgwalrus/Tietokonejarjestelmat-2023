@@ -6,7 +6,7 @@ def square_root(num):
    while(bit > num):
       bit >>= 2
 
-   print(f"oikea bit:{bit}")
+   #print(f"oikea bit:{bit}")
 
    bit = 1
 
@@ -22,13 +22,12 @@ def square_root(num):
       
       bit = bit << 2
 
-   print(f"oma bit:{bit}")
+   #print(f"oma bit:{bit}")
 
    while (bit != 0):
-      print("################################")
-      print(f"r11:{res}, r12:{bit}, r13:{num}")
+      #print("################################")
+      #print(f"r11:{res}, r12:{bit}, r13:{num}")
       print(f"res:{res}, bit:{bit}, num:{num}")
-      print("################################")
       if (num >= res + bit):
          num -= res + bit
          res = (res >> 1) + bit
@@ -37,7 +36,6 @@ def square_root(num):
       
       bit >>= 2
 
-   print(f"vastaus:{res}")
    return res
 
 if __name__ == "__main__":
@@ -45,10 +43,10 @@ if __name__ == "__main__":
       for j in range(1,20):
          assert((i >= j) == (not (i < j)))
 
-   num = square_root(81)
-   for i in range(1, 20):
-      
-      num = square_root(i)
-      print("################")
-      print(f"num: {i}, oma: {num}, oikea: {math.sqrt(i)}")
-      print("################")
+   # num = square_root(81)
+   #for i in range(2,3):
+   i = 4
+   num = square_root(i)
+   #print("################")
+   print(f"NUM: {i}, OMA: {num}, OIKEA: {math.sqrt(i)}")
+   print("################")
