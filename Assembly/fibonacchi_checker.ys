@@ -1,26 +1,44 @@
 # TODO: Main
 # TODO: Siivoa multiplication
 # TODO: Siivoa square root
+# TODO: tee funktio isPerfectSquare
+# TODO: tee funktio isFibonacchi
+
+#####################################################
+# General Registers: 
+# (Values will be modified between functions calls)
+# %rax, %rcx, %rdx, %rbx ,%rsi, %rdi
+#####################################################
+# Input Registers:
+# (Arguments for function calls)
+# %r14, %r13, %r12
+#####################################################
+# Main Registers:
+# (Variables and constants used by Main)
+# %r8, %r9, %r10, %r11
+#####################################################
 main:
     irmovq pino, %rsp       # stack pointer
     irmovq pino, %rbp       # stack start
 #test
-#    irmovq $99, %r12
-#    irmovq $99, %r11
+    
 #test
     call multiplication
     halt
 
-#####################
+#####################################################
 # Multiplication
-#####################
-# Multiplies together the numbers in r11 and r12 
+# %rax = %r11 * %r12
+#####################################################
+# Multiplies together the numbers in r11 and r12
+# using peasant binary algorithm
+##################################################### 
 # Input: %r11, %r12
 # Output: %rax
 # Used registers: rax, rbx, rcx, rdi, rsi, r11, r12
 # TODO: Vähennä käytettyjen registerien määrää
 # TODO: Muuta input ja output rekisterit
-#####################
+#####################################################
 .pos 0x100
 multiplication:            # %rax = %r11 * %r12
     # initialize variables
@@ -53,19 +71,23 @@ multiplication_return:
     rrmovq %rdi, %rax
 
 
-#####################
+###################################################
 # Square root
-#####################
-# Calculates the square root of the number in %r12 
+# %rcx = sqrt(%r12)
+###################################################
+# Calculates the square root of the number in %r12
+###################################################
 # Input: %r12
 # Output: %rcx
 # Used registers: rax, rbx, rcx, r10, r11, r12, 14
 # TODO: Vähennä käytettyjen registerien määrää
 # TODO: Muuta input ja output rekisterit
-#####################
+###################################################
 .pos 0x200
 # res=%r10, bit=%r11, num=%r12
 neliojuuri:                 # %rcx = sqrt(num)
+    %irmovq $0, %r10        # res = 0
+    %irmovw $1, %r11        # bit = 1
 loop1:                      # while(bit << 2 <= num):
     # if(bit << 2 <= num) break
     rrmovq %r11, %rax       # var = bit
@@ -115,15 +137,20 @@ loop2_return:
     rrmovq %r10, %rcx
     ret
 
-#############################
-# Rightshift1 and Rightshift2
-#############################
+###########################################################
+# Rightshift1
+# %r14 = %r14 << 1
+###########################################################
+# Rightshift2
+# %r14 = %r14 << 2
+###########################################################
 # Bitshifts the number in %r14 to the right by 1 or 2 bits
+###########################################################
 # Input: %r14
 # Output: %r14
 # Used registers: rax, rbx, rcx, rdi, rsi, r9, r13, r14
 # TODO: Vähennä käytettyjen registerien määrää
-#############################
+###########################################################
 .pos 0x300
 # initialize bitmasks and zero bits that would shift past 0
 rightshift1:                # %r14 >>= 1
