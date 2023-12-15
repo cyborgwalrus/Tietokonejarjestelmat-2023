@@ -75,68 +75,68 @@ multiplication_return:
 
 ###################################################
 # Square root
-# %rcx = sqrt(%r12)
+# %r13 = sqrt(%r13)
 ###################################################
-# Calculates the square root of the number in %r12
+# Calculates the square root of the number in %r13
 ###################################################
-# Input: %r12
-# Output: %rcx
-# Used registers: rax, rbx, rcx, r10, r11, r12, 14
+# Input: %r13
+# Output: %r13
+# Used registers: rax, rbx, rcx, rdx, r13, 14
 # TODO: Vähennä käytettyjen registerien määrää
 # TODO: Muuta input ja output rekisterit
 ###################################################
 .pos 0x200
-# res=%r10, bit=%r11, num=%r12
-neliojuuri:                 # %rcx = sqrt(num)
-    %irmovq $0, %r10        # res = 0
-    %irmovw $1, %r11        # bit = 1
+# res=%rcx, bit=%rdx, num=%r13
+square_root_r13:                 # %r13 = sqrt(num)
+    %irmovq $0, %rcx        # res = 0
+    %irmovw $1, %rdx        # bit = 1
 loop1:                      # while(bit << 2 <= num):
     # if(bit << 2 <= num) break
-    rrmovq %r11, %rax       # var = bit
+    rrmovq %rdx, %rax       # var = bit
     addq %rax, %rax         # var <<= 2
     addq %rax, %rax       
-    rrmovq %r12, %rbx       # var2 = num
+    rrmovq %r13, %rbx       # var2 = num
     subq %rax, %rbx         # var2 -= bit << 2
     jle loop1_return
     # bit <<= 2
-    addq %r11, %r11        
-    addq %r11, %r11
+    addq %rdx, %rdx        
+    addq %rdx, %rdx
     jmp loop1
 
 loop1_return:
 loop2:                      # while(bit != 0)
     # if(bit != 0) return
-    rrmovq %r11, %rax
+    rrmovq %rdx, %rax
     andq %rax, %rax
     je loop2_return
     # if (num >= res + bit)
-    rrmovq %r10, %rax       # var = res
-    addq %r11, %rax         # var += bit
-    subq %r12, %rax         # if(num < res + bit) jump to loop2_else
+    rrmovq %rcx, %rax       # var = res
+    addq %rdx, %rax         # var += bit
+    subq %r13, %rax         # if(num < res + bit) jump to loop2_else
     jg loop2_else
 # num -= res + bit
-    rrmovq %r10, %rax       # var = res
-    addq %r11, %rax         # var += bit
-    subq %rax, %r12         # num -= var
+    rrmovq %rcx, %rax       # var = res
+    addq %rdx, %rax         # var += bit
+    subq %rax, %r13         # num -= var
 # res = (res >> 1) + bit
-    rrmovq %r10, %r14       # var = res
+    rrmovq %rcx, %r14       # var = res
     call rightshift1        # var >>= 1
-    addq %r11, %r14         # var += bit
-    rrmovq %r14, %r10       # res = var
+    addq %rdx, %r14         # var += bit
+    rrmovq %r14, %rcx       # res = var
     jmp loop2_end
 loop2_else:
     # res >>= 1
-    rrmovq %r10, %r14       # var = res
+    rrmovq %rcx, %r14       # var = res
     call rightshift1        # var >>= 1
-    rrmovq %r14, %r10       # res = var
+    rrmovq %r14, %rcx       # res = var
 loop2_end:
     # bit >>= 2
-    rrmovq %r11, %r14       # var = bit
+    rrmovq %rdx, %r14       # var = bit
     call rightshift2        # var >>= 2
-    rrmovq %r14, %r11       # bit = var
+    rrmovq %r14, %rdx       # bit = var
     jmp loop2
 loop2_return:
-    rrmovq %r10, %rcx
+    rrmovq %rcx, %r13
     ret
 
 ###########################################################
