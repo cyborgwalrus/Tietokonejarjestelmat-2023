@@ -1,7 +1,7 @@
 # TODO: Main
 # TODO: isFibonacchi_r13 palauttaa aina 0, syynä square root?
 # TODO: square rootissa bugeja, sqrt(9) = 0???
-
+# TODO: Valitse rekisterit uusiksi niin että ne eivät varmasti mene ristiin
 #####################################################
 # General Registers: 
 # (Temporary registers used by functions internally)
@@ -9,11 +9,11 @@
 #####################################################
 # Input/Output Registers:
 # (Arguments for function calls)
-# %r14, %r13, %r12
+# %r14, %r13, %r12, %r11, %r10
 #####################################################
 # Main Registers:
 # (For variables and constants used by Main)
-# %r8, %r9, %r10, %r11
+# %r8, %r9 
 #####################################################
 main:
     irmovq pino, %rsp       # stack pointer
@@ -46,6 +46,8 @@ isFibonacchi_r13:
     irmovq $4, %rax   
     addq %rax, %r13     # input = input + 4
     call isPerfectSquare_r13
+    # if(%r13 == 1) jump
+    andq %r13, %r13
     jne r13_is_fibonacchi_number
 
     # isPerfectSquare_r13(5*x*x - 4)
@@ -55,6 +57,8 @@ isFibonacchi_r13:
     irmovq $4, %rax   
     subq %rax, %r13     # input = input - 4
     call isPerfectSquare_r13
+    # if(%r13 == 1) jump
+    andq %r13, %r13
     jne r13_is_fibonacchi_number
 
 r13 is_not_fibonacchi_number:
@@ -95,11 +99,9 @@ isPerfectSquare_r13:
     subq %r14, %r10
     je r13_is_perfect_square
 r13_is_not_perfect_square:
-    xorq %rax, %rax
     irmovq $0, %r13
     ret
 r13_is_perfect_square:
-    xorq %rax, %rax
     irmovq $1, %r13
     ret
 
@@ -161,59 +163,61 @@ multiplication_return:
 # TODO: Vähennä käytettyjen registerien määrää
 ###################################################
 .pos 0x400
-# res=%rcx, bit=%rdx, num=%r13
+# res=%r11, bit=%r12, num=%r13
 square_root_r13: # %r13 = sqrt(num)
-    irmovq $0, %rcx        # res = 0
-    irmovq $1, %rdx        # bit = 1
+    irmovq $0, %r11        # res = 0
+    irmovq $1, %r12        # bit = 1
+
 loop1:                      # while(bit << 2 <= num):
     # if(bit << 2 <= num) break
-    rrmovq %rdx, %rax       # var = bit
+    rrmovq %r12, %rax       # var = bit
     addq %rax, %rax         # var <<= 2
     addq %rax, %rax       
     rrmovq %r13, %rbx       # var2 = num
     subq %rax, %rbx         # var2 -= bit << 2
     jle loop1_return
     # bit <<= 2
-    addq %rdx, %rdx        
-    addq %rdx, %rdx
+    addq %r12, %r12        
+    addq %r12, %r12
     jmp loop1
 
 loop1_return:
+# res=%r11, bit=%r12, num=%r13
+# TODO: 1. kierros oikein, loput väärin
 loop2:                      # while(bit != 0)
-    # if(bit != 0) return
-    rrmovq %rdx, %rax
+    # if(bit == 0) return
+    rrmovq %r12, %rax
     andq %rax, %rax
     je loop2_return
     # if (num >= res + bit)
-    rrmovq %rcx, %rax       # var = res
-    addq %rdx, %rax         # var += bit
+    rrmovq %r11, %rax       # var = res
+    addq %r12, %rax         # var += bit
     subq %r13, %rax         # if(num < res + bit) jump to loop2_else
     jg loop2_else
-# num -= res + bit
-    rrmovq %rcx, %rax       # var = res
-    addq %rdx, %rax         # var += bit
+    # num -= res + bit
+    rrmovq %r11, %rax       # var = res
+    addq %r12, %rax         # var += bit
     subq %rax, %r13         # num -= var
-# res = (res >> 1) + bit
-    rrmovq %rcx, %r14       # var = res
+    # res = (res >> 1) + bit
+    rrmovq %r11, %r14       # var = res
     call rightshift1_r14        # var >>= 1
-    addq %rdx, %r14         # var += bit
-    rrmovq %r14, %rcx       # res = var
+    addq %r12, %r14         # var += bit
+    rrmovq %r14, %r11       # res = var
     jmp loop2_end
 loop2_else:
     # res >>= 1
-    rrmovq %rcx, %r14       # var = res
+    rrmovq %r11, %r14       # var = res
     call rightshift1_r14        # var >>= 1
-    rrmovq %r14, %rcx       # res = var
+    rrmovq %r14, %r11       # res = var
 loop2_end:
     # bit >>= 2
-    rrmovq %rdx, %r14       # var = bit
+    rrmovq %r12, %r14       # var = bit
     call rightshift2_r14        # var >>= 2
-    rrmovq %r14, %rdx       # bit = var
+    rrmovq %r14, %r12       # bit = var
     jmp loop2
 loop2_return:
-    rrmovq %rcx, %r13
+    rrmovq %r11, %r13
     ret
-
 ###########################################################
 # rightshift1_r14
 # %r14 = %r14 << 1
@@ -242,7 +246,7 @@ rightshift2_r14:                # %r14 >>= 2
 
 shiftloop_start:
     # if(result == 0) return 0
-    irmovq $0, %r13         # output = 0
+    irmovq $0, %r10         # output = 0
     je shiftloop_return
     irmovq $0x1, %rcx       # outputmask = %rcx = 0001
     rrmovq %r14, %rdx       # remaining = input
@@ -262,7 +266,7 @@ shiftloop:                  # while(remaining != 0)
     addq %rcx, %rcx         # outputmask += outputmask
     jmp shiftloop
 shiftloop_return:
-    rrmovq %r13, %r14
+    rrmovq %r10, %r14
     ret
 
 .pos 0x600
