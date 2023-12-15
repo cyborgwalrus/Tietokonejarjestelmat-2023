@@ -28,37 +28,38 @@ main:
 
 #####################################################
 # Multiplication
-# %rax = %r11 * %r12
+# %rax = %r14 * %r13
 #####################################################
-# Multiplies together the numbers in r11 and r12
+# Multiplies together the numbers in r14 and r13
 # using peasant binary algorithm
 ##################################################### 
-# Input: %r11, %r12
+# Input: %r14, %r13
 # Output: %rax
-# Used registers: rax, rbx, rcx, rdi, rsi, r11, r12
+# Used registers: rax, rbx, rcx, rdi, rsi, r14, r13
 # TODO: Vähennä käytettyjen registerien määrää
 # TODO: Muuta input ja output rekisterit
+# TODO: Varmista että suurempi luku on r14
 #####################################################
 .pos 0x100
-multiplication:            # %rax = %r11 * %r12
+multiplication:            # %rax = %r14 * %r13
     # initialize variables
     irmovq $1, %rbx        # bitmask = 0b1
     irmovq $0, %rdi        # output = 0
-    rrmovq %r12, %rsi      # remaining = num2
-    rrmovq %r11, %rcx      # bitshifted_num1 = num1 
+    rrmovq %r13, %rsi      # remaining = num2
+    rrmovq %r14, %rcx      # bitshifted_num1 = num1 
 multiplication_loop: # while(remaining != 0):
     rrmovq %rsi, %rax
     andq %rax, %rax
     je multiplication_return
     # read a bit using bitmask
-    rrmovq %r12, %rax     # variable = num2
+    rrmovq %r13, %rax     # variable = num2
     andq %rbx, %rax       # variable = bitmask & variable
     je process_remaining
     # if(variable != 0): add bitshifted_num1 to output
     addq %rcx, %rdi       # output = bitshifted_num1 + output
 process_remaining:
     rrmovq %rbx, %rax
-    andq %r12, %rax
+    andq %r13, %rax
     je process_bitshifts
     # if(remaining & bitmask != 0): remove processed bit from remaining
     subq %rbx, %rsi      # remaining =  remaining - bitmask
@@ -69,6 +70,7 @@ process_bitshifts:
     jmp multiplication_loop
 multiplication_return:
     rrmovq %rdi, %rax
+
 
 
 ###################################################
