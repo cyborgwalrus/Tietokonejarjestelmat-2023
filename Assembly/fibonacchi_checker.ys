@@ -1,30 +1,107 @@
 # TODO: Main
-# TODO: Siivoa multiplication
-# TODO: Siivoa square root
-# TODO: tee funktio isPerfectSquare
-# TODO: tee funktio isFibonacchi
+# TODO: isFibonacchi_r13 palauttaa aina 0, syynä square root?
+# TODO: square rootissa bugeja, sqrt(9) = 0???
 
 #####################################################
 # General Registers: 
-# (Values will be modified between functions calls)
+# (Temporary registers used by functions internally)
 # %rax, %rcx, %rdx, %rbx ,%rsi, %rdi
 #####################################################
-# Input Registers:
+# Input/Output Registers:
 # (Arguments for function calls)
 # %r14, %r13, %r12
 #####################################################
 # Main Registers:
-# (Variables and constants used by Main)
+# (For variables and constants used by Main)
 # %r8, %r9, %r10, %r11
 #####################################################
 main:
     irmovq pino, %rsp       # stack pointer
     irmovq pino, %rbp       # stack start
 #test
-    
+    irmovq $13, %r13
+    call isFibonacchi_r13
+    rrmovq %r13, %rax
 #test
-    call multiplication
     halt
+
+
+#####################################################
+# isFibonacchi_r13
+# %r13 = isFibonacchi_r13(%r13)
+#####################################################
+# Return 1 if the number in %r13 is a fibonaccchi number,
+# returns 0 otherwise
+##################################################### 
+# Input: %r13
+# Output: %r13
+# Used registers: rax, r13, r14
+#####################################################
+.pos 0x100
+isFibonacchi_r13:
+    rrmovq %r13, %r9   # Save a copy of input in %r9
+    
+    # isPerfectSquare_r13(5*x*x + 4)
+    call r13_r13_5      # input = input * input * 5
+    irmovq $4, %rax   
+    addq %rax, %r13     # input = input + 4
+    call isPerfectSquare_r13
+    jne r13_is_fibonacchi_number
+
+    # isPerfectSquare_r13(5*x*x - 4)
+    rrmovq %r9, %r13   # restore copy of input into r13
+    
+    call r13_r13_5      # input = input * input * 5
+    irmovq $4, %rax   
+    subq %rax, %r13     # input = input - 4
+    call isPerfectSquare_r13
+    jne r13_is_fibonacchi_number
+
+r13 is_not_fibonacchi_number:
+    irmovq $0, %r13
+    ret
+r13_is_fibonacchi_number:
+    irmovq $1, %r13
+    ret
+
+r13_r13_5: # %r13 = %r13 * %r13 * 5
+    rrmovq %r13, %r14
+    call multiply_r13_r14
+    irmovq $5, %r13
+    call multiply_r13_r14
+    rrmovq %r14, %r13
+    ret
+
+#####################################################
+# isPerfectSquare_r13
+# %r13 = isPerfectSquare_r13(%r13)
+#####################################################
+# Return 1 if the number in %r13 is perfect square,
+# return 0 otherwise
+##################################################### 
+# Input: %r13
+# Output: %r13
+# Used registers: rax, r13, r14
+#####################################################
+.pos 0x200
+isPerfectSquare_r13:
+    rrmovq %r13, %r10        # var = input
+    call square_root_r13     # arg1 = sqrt(input)
+    rrmovq %r13, %r14        # arg2 = arg1
+    call multiply_r13_r14    # arg2 = arg1 * arg2
+    
+    # if(var == arg1 * arg2) return 1
+    # else return 0 
+    subq %r14, %r10
+    je r13_is_perfect_square
+r13_is_not_perfect_square:
+    xorq %rax, %rax
+    irmovq $0, %r13
+    ret
+r13_is_perfect_square:
+    xorq %rax, %rax
+    irmovq $1, %r13
+    ret
 
 #####################################################
 # Multiplication
@@ -39,8 +116,8 @@ main:
 # TODO: Vähennä käytettyjen registerien määrää
 # TODO: Varmista että suurempi luku on r14
 #####################################################
-.pos 0x100
-multiply_r14_r13:            # %r14 = %r14 * %r13
+.pos 0x300
+multiply_r13_r14:            # %r14 = %r14 * %r13
     # initialize variables
     irmovq $1, %rbx        # bitmask = 0b1
     irmovq $0, %rdi        # output = 0
@@ -69,7 +146,7 @@ process_bitshifts:
     jmp multiplication_loop
 multiplication_return:
     rrmovq %rdi, %r14
-
+    ret
 
 
 ###################################################
@@ -83,11 +160,11 @@ multiplication_return:
 # Used registers: rax, rbx, rcx, rdx, r13, 14
 # TODO: Vähennä käytettyjen registerien määrää
 ###################################################
-.pos 0x200
+.pos 0x400
 # res=%rcx, bit=%rdx, num=%r13
-square_root_r13:                 # %r13 = sqrt(num)
-    %irmovq $0, %rcx        # res = 0
-    %irmovw $1, %rdx        # bit = 1
+square_root_r13: # %r13 = sqrt(num)
+    irmovq $0, %rcx        # res = 0
+    irmovq $1, %rdx        # bit = 1
 loop1:                      # while(bit << 2 <= num):
     # if(bit << 2 <= num) break
     rrmovq %rdx, %rax       # var = bit
@@ -118,19 +195,19 @@ loop2:                      # while(bit != 0)
     subq %rax, %r13         # num -= var
 # res = (res >> 1) + bit
     rrmovq %rcx, %r14       # var = res
-    call rightshift1        # var >>= 1
+    call rightshift1_r14        # var >>= 1
     addq %rdx, %r14         # var += bit
     rrmovq %r14, %rcx       # res = var
     jmp loop2_end
 loop2_else:
     # res >>= 1
     rrmovq %rcx, %r14       # var = res
-    call rightshift1        # var >>= 1
+    call rightshift1_r14        # var >>= 1
     rrmovq %r14, %rcx       # res = var
 loop2_end:
     # bit >>= 2
     rrmovq %rdx, %r14       # var = bit
-    call rightshift2        # var >>= 2
+    call rightshift2_r14        # var >>= 2
     rrmovq %r14, %rdx       # bit = var
     jmp loop2
 loop2_return:
@@ -151,7 +228,7 @@ loop2_return:
 # Used registers: rax, rbx, rcx, rdx, rdi, rsi,  r13, r14
 # TODO: Vähennä käytettyjen registerien määrää
 ###########################################################
-.pos 0x300
+.pos 0x500
 # initialize bitmasks and zero bits that would shift past 0
 rightshift1_r14:                # %r14 >>= 1
     irmovq $0x2, %rbx       # inputmask = %rbx = 0010
@@ -188,5 +265,5 @@ shiftloop_return:
     rrmovq %r13, %r14
     ret
 
-.pos 0x400
+.pos 0x600
 pino:                       # stack address  
