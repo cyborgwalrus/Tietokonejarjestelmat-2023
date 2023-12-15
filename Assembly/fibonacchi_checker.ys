@@ -41,7 +41,7 @@ main:
 # TODO: Varmista että suurempi luku on r14
 #####################################################
 .pos 0x100
-multiplication:            # %rax = %r14 * %r13
+multiply_r14_r13:            # %rax = %r14 * %r13
     # initialize variables
     irmovq $1, %rbx        # bitmask = 0b1
     irmovq $0, %rdi        # output = 0
