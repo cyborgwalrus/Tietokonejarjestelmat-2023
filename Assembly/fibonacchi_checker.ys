@@ -37,7 +37,6 @@ main:
 # Output: %r14
 # Used registers: rax, rbx, rcx, rdi, rsi, r14, r13
 # TODO: Vähennä käytettyjen registerien määrää
-# TODO: Muuta input ja output rekisterit
 # TODO: Varmista että suurempi luku on r14
 #####################################################
 .pos 0x100
@@ -83,7 +82,6 @@ multiplication_return:
 # Output: %r13
 # Used registers: rax, rbx, rcx, rdx, r13, 14
 # TODO: Vähennä käytettyjen registerien määrää
-# TODO: Muuta input ja output rekisterit
 ###################################################
 .pos 0x200
 # res=%rcx, bit=%rdx, num=%r13
