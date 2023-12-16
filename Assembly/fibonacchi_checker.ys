@@ -1,15 +1,31 @@
 #########################################################
-# Fibonacchi checker
+# FIBONACCHI CHECKER
 #########################################################
 # by Matias Björklund
 # 2207800
 # matias.bjorklund@student.oulu.fi
 #########################################################
+
+########################################################
+# MEASUREMENTS
+#########################################################
+# VERSION 1
+# test series:
+# 1,1,2,3,5,8,13,21,34,55,233,377,610,987,1000
+# 33003 instructions executed
+#########################################################
+
+#########################################################
+# INPUT/OUTPUT
+#########################################################
 # Input: Array in the memory location 0x700
+#
 # Output: returns 0 in the %rax register if all the 
 # numbers in the array were fibonacchi numbers,
 # otherwise returns the first non-fibonacchi-number found
-#####################################################
+#########################################################
+# REGISTERS
+#########################################################
 # General Registers: 
 # (Registers used by functions)
 # %rax, %rcx, %rdx, %rbx, %r8, %r9, %r10, %r11, %r12
@@ -300,23 +316,24 @@ pino:                       # stack address
 .pos 0x700
 .align 8
 array:
-#.quad 0x1
-#.quad 0x2
-#.quad 0x3
-#.quad 0x5
-#.quad 0x8
-#.quad 0xd
-#.quad 0x15
-#.quad 0x22
-#.quad 0x37
-#.quad 0x59
-#.quad 0x90
-#.quad 0xe9
-#.quad 0x179
-#.quad 0x262
-#.quad 0x3db
+.quad 0x1
+.quad 0x2
+.quad 0x3
+.quad 0x5
+.quad 0x8
+.quad 0xd
+.quad 0x15
+.quad 0x22
+.quad 0x37
+.quad 0x59
+.quad 0x90
+.quad 0xe9
+.quad 0x179
+.quad 0x262
+.quad 0x3db
+.quad 0x3e8
 #.quad 0x63d
 #.quad 0xa18
 #.quad 0x1055
 #.quad 0x1a6d
-#.quad 0x2ac2
+.quad 0x0
