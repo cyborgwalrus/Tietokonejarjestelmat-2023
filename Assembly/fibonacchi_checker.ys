@@ -1,21 +1,48 @@
-# TODO: Main
+# TODO: Kommentteja, pohdintoja
+# TODO: Testaa ei-fibonacchi-luvuilla
 #####################################################
 # General Registers: 
 # (Registers used by functions)
-# %rax, %rcx, %rdx, %rbx ,%rsi, %rdi, %r8, %r9, %r10, %r11, %r12
+# %rax, %rcx, %rdx, %rbx, %r8, %r9, %r10, %r11, %r12
 #####################################################
 # Input/Output Registers:
 # (Arguments for function calls)
 # %r14, %r13
 #####################################################
+
 main:
     irmovq pino, %rsp       # stack pointer
     irmovq pino, %rbp       # stack start
-#test
-    irmovq $13, %r13
+    irmovq array, %rsi      # array pointer
+
+array_loop:
+    nop
+    nop
+    nop
+    mrmovq (%rsi), %r13
+
+    rrmovq %r13, %rax
+    andq %rax, %rax
+    je end_of_array_reached # if(r13 == 0) return 0
+    # r13 wasnt 0, calling function
     call isFibonacchi_r13
     rrmovq %r13, %rax
-#test
+    andq %rax, %rax
+    je not_fibonacchi_found # if(r13 == 0) return (%rsi)
+move_array_pointer:
+    irmovq $8, %rax
+    addq %rax, %rsi
+    jmp array_loop
+
+not_fibonacchi_found:
+    # Non-fibonacchi number was found,
+    # ending program with the number in %rax
+    mrmovq (%rsi), %rax
+    halt
+
+end_of_array_reached:
+    # all numbers where fibbonacchi numbers,
+    # ending program with 0 in the %rax register
     halt
 
 
@@ -116,10 +143,10 @@ multiply_r13_r14:            # %r14 = %r14 * %r13
     # initialize variables
     irmovq $1, %rbx        # bitmask = 0b1
     irmovq $0, %rdi        # output = 0
-    rrmovq %r13, %rsi      # remaining = num2
+    rrmovq %r13, %rdx      # remaining = num2
     rrmovq %r14, %rcx      # bitshifted_num1 = num1 
 multiplication_loop: # while(remaining != 0):
-    rrmovq %rsi, %rax
+    rrmovq %rdx, %rax
     andq %rax, %rax
     je multiplication_return
     # read a bit using bitmask
@@ -133,7 +160,7 @@ process_remaining:
     andq %r13, %rax
     je process_bitshifts
     # if(remaining & bitmask != 0): remove processed bit from remaining
-    subq %rbx, %rsi      # remaining =  remaining - bitmask
+    subq %rbx, %rdx      # remaining =  remaining - bitmask
 process_bitshifts:
     # bitshift bitmask and bitshifted_num1 to the left
     addq %rbx, %rbx      # bitmask = bitmask + bitmask
@@ -222,7 +249,7 @@ loop2_return:
 ###########################################################
 # Input: %r14
 # Output: %r14
-# Used registers: rax, rbx, rcx, rdx, rdi, rsi,  r13, r14
+# Used registers: rax, rbx, rcx, rdx, rdi, r13, r14
 # TODO: Vähennä käytettyjen registerien määrää
 ###########################################################
 .pos 0x500
@@ -239,28 +266,51 @@ rightshift2_r14:                # %r14 >>= 2
 
 shiftloop_start:
     # if(result == 0) return 0
-    irmovq $0, %r10         # output = 0
+    irmovq $0, %rdi         # output = 0
     je shiftloop_return
     irmovq $0x1, %rcx       # outputmask = %rcx = 0001
     rrmovq %r14, %rdx       # remaining = input
 shiftloop:                  # while(remaining != 0)
-    irmovq $0, %rsi         # inputbuffer = 0
-    irmovq $0, %rdi         # outputbuffer = 0
     rrmovq %r14, %rax       # var = input
     andq %rbx, %rax         # var &= inputmask
-    cmovne %rbx, %rsi       # if(var != 0) inputbuffer = inputputmask
-    cmovne %rcx, %rdi       # if(var != 0) outputbuffer = outputmask
-    addq %rdi, %r10         # output += outputbuffer
+    je read_bit_was_0
+read_bit_was_1:
+    addq %rcx, %rdi         # output += outputmask
+    subq %rbx, %rdx         # remaining -= inputmask
     # if(remaining == 0) return
-    subq %rsi, %rdx         # remaining -= inputbuffer
     jle shiftloop_return    
+read_bit_was_0:
     # Increment masks
     addq %rbx, %rbx         # inputmask += inputmask
     addq %rcx, %rcx         # outputmask += outputmask
     jmp shiftloop
 shiftloop_return:
-    rrmovq %r10, %r14
+    rrmovq %rdi, %r14
     ret
 
 .pos 0x600
-pino:                       # stack address  
+pino:                       # stack address
+
+.pos 0x700
+.align 8
+array:
+.quad 0x1
+.quad 0x2
+.quad 0x3
+.quad 0x5
+.quad 0x8
+.quad 0xd
+.quad 0x15
+.quad 0x22
+.quad 0x37
+.quad 0x59
+.quad 0x90
+.quad 0xe9
+.quad 0x179
+.quad 0x262
+.quad 0x3db
+.quad 0x63d
+.quad 0xa18
+.quad 0x1055
+.quad 0x1a6d
+.quad 0x2ac2
