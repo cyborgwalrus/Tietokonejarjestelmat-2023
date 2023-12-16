@@ -1,18 +1,29 @@
-# TODO: Kommentteja, pohdintoja
-# TODO: Testaa ei-fibonacchi-luvuilla
+#########################################################
+# Fibonacchi checker
+#########################################################
+# by Matias Björklund
+# 2207800
+# matias.bjorklund@student.oulu.fi
+#########################################################
+# Input: Array in the memory location 0x700
+# Output: returns 0 in the %rax register if all the 
+# numbers in the array were fibonacchi numbers,
+# otherwise returns the first non-fibonacchi-number found
 #####################################################
 # General Registers: 
 # (Registers used by functions)
 # %rax, %rcx, %rdx, %rbx, %r8, %r9, %r10, %r11, %r12
-#####################################################
+##########################################################
 # Input/Output Registers:
-# (Arguments for function calls)
+# (Arguments and return values for function calls)
 # %r14, %r13
-#####################################################
+##########################################################
 # Other registers:
 # %rsi (array pointer)
-#####################################################
+##########################################################
 
+# TODO: Kommentteja, pohdintoja
+# TODO: Testaa ei-fibonacchi-luvuilla
 main:
     irmovq pino, %rsp       # stack pointer
     irmovq pino, %rbp       # stack start
