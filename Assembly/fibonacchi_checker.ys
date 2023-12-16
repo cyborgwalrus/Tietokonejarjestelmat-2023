@@ -30,9 +30,6 @@ main:
     irmovq array, %rsi      # array pointer
 
 array_loop:
-    nop
-    nop
-    nop
     mrmovq (%rsi), %r13
 
     rrmovq %r13, %rax
@@ -71,7 +68,7 @@ end_of_array_reached:
 # Output: %r13
 # Used registers: rax, r13, r14
 #####################################################
-.pos 0x100
+.pos 0x120
 isFibonacchi_r13:
     rrmovq %r13, %r9   # Save a copy of input in %r9
     
@@ -303,23 +300,23 @@ pino:                       # stack address
 .pos 0x700
 .align 8
 array:
-.quad 0x1
-.quad 0x2
-.quad 0x3
-.quad 0x5
-.quad 0x8
-.quad 0xd
-.quad 0x15
-.quad 0x22
-.quad 0x37
-.quad 0x59
-.quad 0x90
-.quad 0xe9
-.quad 0x179
-.quad 0x262
-.quad 0x3db
-.quad 0x63d
-.quad 0xa18
-.quad 0x1055
-.quad 0x1a6d
-.quad 0x2ac2
+#.quad 0x1
+#.quad 0x2
+#.quad 0x3
+#.quad 0x5
+#.quad 0x8
+#.quad 0xd
+#.quad 0x15
+#.quad 0x22
+#.quad 0x37
+#.quad 0x59
+#.quad 0x90
+#.quad 0xe9
+#.quad 0x179
+#.quad 0x262
+#.quad 0x3db
+#.quad 0x63d
+#.quad 0xa18
+#.quad 0x1055
+#.quad 0x1a6d
+#.quad 0x2ac2
