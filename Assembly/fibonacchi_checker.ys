@@ -1,31 +1,51 @@
-#########################################################
+###########################################################
 # FIBONACCHI CHECKER
-#########################################################
+###########################################################
 # by Matias Björklund
-# 2207800
-# matias.bjorklund@student.oulu.fi
-#########################################################
+# Student number: 2207800
+# Email: matias.bjorklund@student.oulu.fi
+############################################################
 
-########################################################
+
+############################################################
 # MEASUREMENTS
-#########################################################
+# test series: 1,1,2,3,5,8,13,21,34,55,233,377,610,987,1000
+############################################################
 # VERSION 1
-# test series:
-# 1,1,2,3,5,8,13,21,34,55,233,377,610,987,1000
 # 33003 instructions executed
-#########################################################
-
-#########################################################
-# INPUT/OUTPUT
-#########################################################
-# Input: Array in the memory location 0x700
+# OPTIMIZATIONS:
+# 
+# Multiplication:
+# Optimized functions calls so that most of the time, the smaller
+# input gets stored in the %r13 register, leading to shorter loops.
 #
-# Output: returns 0 in the %rax register if all the 
-# numbers in the array were fibonacchi numbers,
-# otherwise returns the first non-fibonacchi-number found
-#########################################################
+# Square root: 
+# Inverted the logic in the first loop so the  manipulation
+# of the bit variable can be done with leftshifts instead 
+# of much slower rightshifts.
+#
+# Rightshift1 and Rightshift2: 
+# Replaced divisions with moving bitmasks, the functions
+# now scale better with larger input numbers.
+#
+# BUGS FIXED:
+# The program ran correctly until it reached either of the halt
+# statements and then jumped to a random line and continuing execution,
+# leading to an infinite loop. 
+# The bug was caused by main being long enough to overlap
+# with the first function in 0x100.
+#
+# COMMENTS:
+# Hard to find ways to optimize functions without completely
+# reworking their underlying algorithms. Maybe shave off an
+# operation here or there that might add up to 100 or 1000 
+# fewer total instructions.
+##########################################################
+
+
+##########################################################
 # REGISTERS
-#########################################################
+##########################################################
 # General Registers: 
 # (Registers used by functions)
 # %rax, %rcx, %rdx, %rbx, %r8, %r9, %r10, %r11, %r12
@@ -38,8 +58,16 @@
 # %rsi (array pointer)
 ##########################################################
 
-# TODO: Kommentteja, pohdintoja
-# TODO: Testaa ei-fibonacchi-luvuilla
+
+##########################################################
+# MAIN
+##########################################################
+# Input: Array in the memory location 0x700
+# Output: returns 0 in the %rax register if all the 
+# numbers in the array were fibonacchi numbers,
+# otherwise returns the first non-fibonacchi-number found
+# Used Registers: %rax, %rsi, %r13 
+##########################################################
 main:
     irmovq pino, %rsp       # stack pointer
     irmovq pino, %rbp       # stack start
@@ -77,7 +105,9 @@ end_of_array_reached:
 # isFibonacchi_r13
 # %r13 = isFibonacchi_r13(%r13)
 #####################################################
-# Return 1 if the number in %r13 is a fibonaccchi number,
+# Return 1 if the number in %r13 is a fibonaccchi number 
+# by checking if isPerfectSquare_r13(5*x*x + 4) or 
+# isPerfectSquare_r13(5*x*x - 4) return true
 # returns 0 otherwise
 ##################################################### 
 # Input: %r13
@@ -132,7 +162,7 @@ r13_r13_5: # %r13 = %r13 * %r13 * 5
 ##################################################### 
 # Input: %r13
 # Output: %r13
-# Used registers: rax, r13, r14
+# Used registers: rax, r8, r13, r14
 #####################################################
 .pos 0x200
 isPerfectSquare_r13:
@@ -201,6 +231,8 @@ multiplication_return:
 # %r13 = sqrt(%r13)
 ###################################################
 # Calculates the square root of the number in %r13
+# using the following algorithm:
+# https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Binary_numeral_system_(base_2)
 ###################################################
 # Input: %r13
 # Output: %r13
@@ -269,10 +301,12 @@ loop2_return:
 # %r14 = %r14 << 2
 ###########################################################
 # Bitshifts the number in %r14 to the right by 1 or 2 bits
+# Using input and output bitmasks, output bitmask being
+# offset to the right by 1 or 2 bits
 ###########################################################
 # Input: %r14
 # Output: %r14
-# Used registers: rax, rbx, rcx, rdx, rdi, r13, r14
+# Used registers: rax, rbx, rcx, rdx, rdi, r14
 ###########################################################
 .pos 0x500
 # initialize bitmasks and zero bits that would shift past 0
