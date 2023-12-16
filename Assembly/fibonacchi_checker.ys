@@ -95,7 +95,7 @@ isFibonacchi_r13:
     andq %r13, %r13
     jne r13_is_fibonacchi_number
 
-r13 is_not_fibonacchi_number:
+r13_is_not_fibonacchi_number:
     irmovq $0, %r13
     ret
 r13_is_fibonacchi_number:
