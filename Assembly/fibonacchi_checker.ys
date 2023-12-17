@@ -27,10 +27,19 @@
 # Rightshift1 and Rightshift2: 
 # Replaced divisions with moving bitmasks, the functions
 # now scale better with larger input numbers.
+#--------------------------------------------------------------
+# VERSION 2
+# 31829 instructions executed
+# OPTIMIZATIONS:
+#
+# isFibonacchi:
+# Realized I could cache the return value of r13_r13_5 and re-use
+# it for the second function call of isPerfectSquare.
+#
 #
 # BUGS FIXED:
 # The program ran correctly until it reached either of the halt
-# statements and then jumped to a random line and continuing execution,
+# statements, and then jumped to a random line and continuing execution,
 # leading to an infinite loop. 
 # The bug was caused by main being long enough to overlap
 # with the first function in 0x100.
@@ -98,6 +107,7 @@ not_fibonacchi_found:
 end_of_array_reached:
     # all numbers where fibbonacchi numbers,
     # ending program with 0 in the %rax register
+    irmovq $0, %rax
     halt
 
 
@@ -116,10 +126,9 @@ end_of_array_reached:
 #####################################################
 .pos 0x120
 isFibonacchi_r13:
-    rrmovq %r13, %r9   # Save a copy of input in %r9
-    
     # isPerfectSquare_r13(5*x*x + 4)
     call r13_r13_5      # input = input * input * 5
+    rrmovq %r13, %r9   # Save a copy of input in %r9
     irmovq $4, %rax   
     addq %rax, %r13     # input = input + 4
     call isPerfectSquare_r13
@@ -129,9 +138,7 @@ isFibonacchi_r13:
 
     # isPerfectSquare_r13(5*x*x - 4)
     rrmovq %r9, %r13   # restore copy of input into r13
-    
-    call r13_r13_5      # input = input * input * 5
-    irmovq $4, %rax   
+    irmovq $4, %rax
     subq %rax, %r13     # input = input - 4
     call isPerfectSquare_r13
     # if(%r13 == 1) jump
@@ -366,6 +373,8 @@ array:
 #.quad 0x262
 #.quad 0x3db
 #.quad 0x3e8
+#.quad 0x0
+
 #.quad 0x63d
 #.quad 0xa18
 #.quad 0x1055
