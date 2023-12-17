@@ -26,7 +26,9 @@
 #
 # Rightshift1 and Rightshift2: 
 # Replaced divisions with moving bitmasks, the functions
-# now scale better with larger input numbers.
+# now scale better with larger input numbers, while still being
+# fast for smaller input numbers because the bitmasks are moving
+# right to left.
 #--------------------------------------------------------------
 # VERSION 2
 # 31829 instructions executed
@@ -74,7 +76,9 @@
 # reworking their underlying algorithms. Maybe shave off an
 # operation here or there that might add up to 100 or 1000 
 # fewer total instructions.
-##########################################################
+# The program is clearly bottlenecked by square root calls, both 
+# rightshift1 and rightshift2 are being called 174 times each.
+######################################################################
 
 
 ##########################################################
@@ -89,7 +93,9 @@
 # %r14, %r13
 ##########################################################
 # Other registers:
-# %rsi (array pointer)
+# %rsp      stack pointer
+# %rbp      stack start
+# %rsi      array pointer
 ##########################################################
 
 
@@ -150,7 +156,6 @@ end_of_array_reached:
 # Output: %r13
 # Used registers: rax, r13, r14
 #####################################################
-.pos 0x120
 isFibonacchi_r13:
     # isPerfectSquare_r13(5*x*x + 4)
     call r13_r13_5                  # input = input * input * 5
@@ -197,7 +202,6 @@ r13_r13_5: # %r13 = %r13 * %r13 * 5
 # Output: %r13
 # Used registers: rax, r8, r13, r14
 #####################################################
-.pos 0x200
 isPerfectSquare_r13:
     rrmovq %r13, %r8                # var = input
     call square_root_r13            # arg1 = sqrt(input)
@@ -226,7 +230,6 @@ r13_is_perfect_square:
 # Output: %r14
 # Used registers: rax, rbx, rcx, rdi, r14, r13
 #####################################################
-.pos 0x300
 multiply_r13_r14: # %r14 = %r14 * %r13
     # initialize variables
     irmovq $1, %rbx             # bitmask = 0b1
@@ -273,7 +276,6 @@ multiplication_return:
 # Output: %r13
 # Used registers: rax, rbx, rcx, rdx, r11, r12, r13, r14
 ###################################################
-.pos 0x400
 # res=%r11, bit=%r12, num=%r13
 square_root_r13: # %r13 = sqrt(num)
     irmovq $0, %r11             # res = 0
@@ -342,7 +344,6 @@ loop2_return:
 # Output: %r14
 # Used registers: rax, rbx, rcx, rdx, rdi, r14
 ###########################################################
-.pos 0x500
 # initialize bitmasks and zero bits that would shift past 0
 rightshift1_r14:                # %r14 >>= 1
     irmovq $0x2, %rbx           # inputmask = %rbx = 0010
