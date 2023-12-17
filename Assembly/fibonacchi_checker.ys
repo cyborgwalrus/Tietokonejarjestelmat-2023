@@ -59,7 +59,17 @@
 # OPTIMIZATIONS:
 # 
 # Square Root:
-# Did the same optimization that I did to Multiplication in version 2.1 
+# Did the same optimization that I did to Multiplication in version 2.1
+#----------------------------------------------------------------------
+# VERSION 2.3
+# 30215 instructions executed
+# FUNCTION CALLS:
+# Same as version 2
+# OPTIMIZATIONS:
+# 
+# r13_r13_5:
+# Replaced the second call of multiplication with manual addition because
+# the second operand was always 5
 #######################################################################
 
 
@@ -185,10 +195,13 @@ r13_is_fibonacchi_number:
 
 r13_r13_5: # %r13 = %r13 * %r13 * 5
     rrmovq %r13, %r14
+    # %r13 *= %r13
     call multiply_r13_r14
-    irmovq $5, %r13
-    call multiply_r13_r14
+    # %r13 *= 5
     rrmovq %r14, %r13
+    addq %r13, %r13
+    addq %r13, %r13
+    addq %r14, %r13
     ret
 
 #####################################################
@@ -203,12 +216,12 @@ r13_r13_5: # %r13 = %r13 * %r13 * 5
 # Used registers: rax, r8, r13, r14
 #####################################################
 isPerfectSquare_r13:
-    rrmovq %r13, %r8                # var = input
-    call square_root_r13            # arg1 = sqrt(input)
-    rrmovq %r13, %r14               # arg2 = arg1
-    call multiply_r13_r14           # arg2 = arg1 * arg2
+    rrmovq %r13, %r8                # save a copy of input in %r8
+    call square_root_r13            # %r14 = sqrt(input)
+    rrmovq %r13, %r14
+    call multiply_r13_r14           # %r14 *= %r13
     
-    # if(var == arg1 * arg2) return 1
+    # if( input == sqrt(input) * sqrt(input) ) return 1
     # else return 0 
     subq %r14, %r8
     je r13_is_perfect_square
