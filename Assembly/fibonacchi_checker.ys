@@ -9,7 +9,7 @@
 
 ############################################################
 # MEASUREMENTS
-# test series: 1,1,2,3,5,8,13,21,34,55,233,377,610,987,1000
+# test series: 1,2,3,5,8,13,21,34,55,233,377,610,987,1000
 ############################################################
 # VERSION 1
 # 33003 instructions executed
@@ -30,13 +30,38 @@
 #--------------------------------------------------------------
 # VERSION 2
 # 31829 instructions executed
+# FUNCTION CALLS:
+# isFibonacchi: 16, isPerfectSquare: 24, Multiplication: 56,
+# SquareRoot: 24, rightshift1: 174, rightshift2: 174
 # OPTIMIZATIONS:
-#
+# 
 # isFibonacchi:
 # Realized I could cache the return value of r13_r13_5 and re-use
 # it for the second function call of isPerfectSquare.
-#
-#
+#--------------------------------------------------------------
+# VERSION 2.1
+# 31085 instructions executed
+# FUNCTION CALLS:
+# Same as version 2
+# OPTIMIZATIONS:
+# 
+# Multiplication:
+# Moved loop checking "if(remaining == 0)" from the start of the loop
+# to right after where remaining is processed. Saves instructions
+# in cases where remaining isn't changed.
+#--------------------------------------------------------------
+# VERSION 2.2
+# 30839 instructions executed
+# FUNCTION CALLS:
+# Same as version 2
+# OPTIMIZATIONS:
+# 
+# Square Root:
+# Did the same optimization that I did to Multiplication in version 2.1 
+#######################################################################
+
+
+######################################################################
 # BUGS FIXED:
 # The program ran correctly until it reached either of the halt
 # statements, and then jumped to a random line and continuing execution,
@@ -75,24 +100,25 @@
 # Output: returns 0 in the %rax register if all the 
 # numbers in the array were fibonacchi numbers,
 # otherwise returns the first non-fibonacchi-number found
+##########################################################
 # Used Registers: %rax, %rsi, %r13 
 ##########################################################
 main:
-    irmovq pino, %rsp       # stack pointer
-    irmovq pino, %rbp       # stack start
-    irmovq array, %rsi      # array pointer
+    irmovq pino, %rsp               # stack pointer
+    irmovq pino, %rbp               # stack start
+    irmovq array, %rsi              # array pointer
 
 array_loop:
     mrmovq (%rsi), %r13
 
     rrmovq %r13, %rax
     andq %rax, %rax
-    je end_of_array_reached # if(r13 == 0) return 0
+    je end_of_array_reached         # if(r13 == 0) return 0
     # r13 wasnt 0, calling function
     call isFibonacchi_r13
     rrmovq %r13, %rax
     andq %rax, %rax
-    je not_fibonacchi_found # if(r13 == 0) return (%rsi)
+    je not_fibonacchi_found         # if(r13 == 0) return (%rsi)
 move_array_pointer:
     irmovq $8, %rax
     addq %rax, %rsi
@@ -127,19 +153,19 @@ end_of_array_reached:
 .pos 0x120
 isFibonacchi_r13:
     # isPerfectSquare_r13(5*x*x + 4)
-    call r13_r13_5      # input = input * input * 5
-    rrmovq %r13, %r9   # Save a copy of input in %r9
+    call r13_r13_5                  # input = input * input * 5
+    rrmovq %r13, %r9                # Save a copy of input in %r9
     irmovq $4, %rax   
-    addq %rax, %r13     # input = input + 4
+    addq %rax, %r13                 # input += 4
     call isPerfectSquare_r13
     # if(%r13 == 1) jump
     andq %r13, %r13
     jne r13_is_fibonacchi_number
 
     # isPerfectSquare_r13(5*x*x - 4)
-    rrmovq %r9, %r13   # restore copy of input into r13
+    rrmovq %r9, %r13                # restore copy of input into r13
     irmovq $4, %rax
-    subq %rax, %r13     # input = input - 4
+    subq %rax, %r13                 # input -= 4
     call isPerfectSquare_r13
     # if(%r13 == 1) jump
     andq %r13, %r13
@@ -173,10 +199,10 @@ r13_r13_5: # %r13 = %r13 * %r13 * 5
 #####################################################
 .pos 0x200
 isPerfectSquare_r13:
-    rrmovq %r13, %r8        # var = input
-    call square_root_r13     # arg1 = sqrt(input)
-    rrmovq %r13, %r14        # arg2 = arg1
-    call multiply_r13_r14    # arg2 = arg1 * arg2
+    rrmovq %r13, %r8                # var = input
+    call square_root_r13            # arg1 = sqrt(input)
+    rrmovq %r13, %r14               # arg2 = arg1
+    call multiply_r13_r14           # arg2 = arg1 * arg2
     
     # if(var == arg1 * arg2) return 1
     # else return 0 
@@ -201,32 +227,34 @@ r13_is_perfect_square:
 # Used registers: rax, rbx, rcx, rdi, r14, r13
 #####################################################
 .pos 0x300
-multiply_r13_r14:            # %r14 = %r14 * %r13
+multiply_r13_r14: # %r14 = %r14 * %r13
     # initialize variables
-    irmovq $1, %rbx        # bitmask = 0b1
-    irmovq $0, %rdi        # output = 0
-    rrmovq %r13, %rdx      # remaining = num2
-    rrmovq %r14, %rcx      # bitshifted_num1 = num1 
+    irmovq $1, %rbx             # bitmask = 0b1
+    irmovq $0, %rdi             # output = 0
+    rrmovq %r13, %rdx           # remaining = num2
+    rrmovq %r14, %rcx           # bitshifted_num1 = num1 
 multiplication_loop: # while(remaining != 0):
-    rrmovq %rdx, %rax
-    andq %rax, %rax
-    je multiplication_return
+    
     # read a bit using bitmask
-    rrmovq %r13, %rax     # variable = num2
-    andq %rbx, %rax       # variable = bitmask & variable
+    rrmovq %r13, %rax           # variable = num2
+    andq %rbx, %rax             # variable = bitmask & variable
     je process_remaining
     # if(variable != 0): add bitshifted_num1 to output
-    addq %rcx, %rdi       # output = bitshifted_num1 + output
+    addq %rcx, %rdi             # output += bitshifted_num1
 process_remaining:
     rrmovq %rbx, %rax
     andq %r13, %rax
     je process_bitshifts
     # if(remaining & bitmask != 0): remove processed bit from remaining
-    subq %rbx, %rdx      # remaining =  remaining - bitmask
+    subq %rbx, %rdx             # remaining -= bitmask
+    # Loop checking
+    rrmovq %rdx, %rax
+    andq %rax, %rax
+    je multiplication_return    # if(remaining == 0) return output 
 process_bitshifts:
     # bitshift bitmask and bitshifted_num1 to the left
-    addq %rbx, %rbx      # bitmask = bitmask + bitmask
-    addq %rcx, %rcx      # bitshifted_num1 = bitshifted_num1 + bitshifted_num1
+    addq %rbx, %rbx             # bitmask <<= 1
+    addq %rcx, %rcx             # bitshifted_num1 <<= 1
     jmp multiplication_loop
 multiplication_return:
     rrmovq %rdi, %r14
@@ -248,16 +276,16 @@ multiplication_return:
 .pos 0x400
 # res=%r11, bit=%r12, num=%r13
 square_root_r13: # %r13 = sqrt(num)
-    irmovq $0, %r11        # res = 0
-    irmovq $1, %r12        # bit = 1
+    irmovq $0, %r11             # res = 0
+    irmovq $1, %r12             # bit = 1
 
-loop1:                      # while(bit << 2 <= num):
+loop1:                          # while(bit << 2 <= num):
     # if(bit << 2 <= num) break
-    rrmovq %r12, %rax       # var = bit
-    addq %rax, %rax         # var <<= 2
+    rrmovq %r12, %rax           # var = bit
+    addq %rax, %rax             # var <<= 2
     addq %rax, %rax       
-    rrmovq %r13, %rbx       # var2 = num
-    subq %rax, %rbx         # var2 -= bit << 2
+    rrmovq %r13, %rbx           # var2 = num
+    subq %rax, %rbx             # var2 -= bit << 2
     jl loop1_return
     # bit <<= 2
     addq %r12, %r12        
@@ -266,37 +294,36 @@ loop1:                      # while(bit << 2 <= num):
 
 loop1_return:
 # res=%r11, bit=%r12, num=%r13
-loop2:                      # while(bit != 0)
-    # if(bit == 0) return
-    rrmovq %r12, %rax
-    andq %rax, %rax
-    je loop2_return
+loop2:                          # while(bit != 0)
     # if (num >= res + bit)
-    rrmovq %r11, %rax       # var = res
-    addq %r12, %rax         # var += bit
-    subq %r13, %rax         # if(num < res + bit) jump to loop2_else
+    rrmovq %r11, %rax           # var = res
+    addq %r12, %rax             # var += bit
+    subq %r13, %rax             # if(num < res + bit) jump to loop2_else
     jg loop2_else
     # num -= res + bit
-    rrmovq %r11, %rax       # var = res
-    addq %r12, %rax         # var += bit
-    subq %rax, %r13         # num -= var
+    rrmovq %r11, %rax           # var = res
+    addq %r12, %rax             # var += bit
+    subq %rax, %r13             # num -= var
     # res = (res >> 1) + bit
-    rrmovq %r11, %r14       # var = res
+    rrmovq %r11, %r14           # var = res
     call rightshift1_r14        # var >>= 1
-    addq %r12, %r14         # var += bit
-    rrmovq %r14, %r11       # res = var
+    addq %r12, %r14             # var += bit
+    rrmovq %r14, %r11           # res = var
     jmp loop2_end
 loop2_else:
     # res >>= 1
-    rrmovq %r11, %r14       # var = res
+    rrmovq %r11, %r14           # var = res
     call rightshift1_r14        # var >>= 1
-    rrmovq %r14, %r11       # res = var
+    rrmovq %r14, %r11           # res = var
 loop2_end:
     # bit >>= 2
-    rrmovq %r12, %r14       # var = bit
+    rrmovq %r12, %r14           # var = bit
     call rightshift2_r14        # var >>= 2
-    rrmovq %r14, %r12       # bit = var
-    jmp loop2
+    rrmovq %r14, %r12           # bit = var
+    # Loop checking
+    rrmovq %r12, %rax
+    andq %rax, %rax
+    jne loop2                   # if(bit == 0) return result
 loop2_return:
     rrmovq %r11, %r13
     ret
@@ -318,41 +345,52 @@ loop2_return:
 .pos 0x500
 # initialize bitmasks and zero bits that would shift past 0
 rightshift1_r14:                # %r14 >>= 1
-    irmovq $0x2, %rbx       # inputmask = %rbx = 0010
+    irmovq $0x2, %rbx           # inputmask = %rbx = 0010
     irmovq $0xfffffffffffffffe,  %rax
-    andq %rax, %r14         # zero lowest bit
+    andq %rax, %r14             # zero lowest bit
     jmp shiftloop_start
 rightshift2_r14:                # %r14 >>= 2
-    irmovq $0x4, %rbx       # inputmask = %rbx = 0100
+    irmovq $0x4, %rbx           # inputmask = %rbx = 0100
     irmovq $0xfffffffffffffffc,  %rax
-    andq %rax, %r14         # zero 2 lowest bits
+    andq %rax, %r14             # zero 2 lowest bits
 
 shiftloop_start:
-    # if(result == 0) return 0
-    irmovq $0, %rdi         # output = 0
-    je shiftloop_return
-    irmovq $0x1, %rcx       # outputmask = %rcx = 0001
-    rrmovq %r14, %rdx       # remaining = input
-shiftloop:                  # while(remaining != 0)
-    rrmovq %r14, %rax       # var = input
-    andq %rbx, %rax         # var &= inputmask
+    irmovq $0, %rdi             # output = 0
+    je shiftloop_return         # if(input == 0) return 0
+    # input wasn't zero, continuing
+    irmovq $0x1, %rcx           # outputmask = %rcx = 0001
+    rrmovq %r14, %rdx           # remaining = input
+shiftloop: # while(remaining != 0)
+    rrmovq %r14, %rax           # var = input
+    andq %rbx, %rax             # var &= inputmask
     je read_bit_was_0
 read_bit_was_1:
-    addq %rcx, %rdi         # output += outputmask
-    subq %rbx, %rdx         # remaining -= inputmask
-    # if(remaining == 0) return
-    jle shiftloop_return    
+    addq %rcx, %rdi             # output += outputmask
+    subq %rbx, %rdx             # remaining -= inputmask
+    jle shiftloop_return        # if(remaining == 0) return output
 read_bit_was_0:
     # Increment masks
-    addq %rbx, %rbx         # inputmask += inputmask
-    addq %rcx, %rcx         # outputmask += outputmask
+    addq %rbx, %rbx             # inputmask += inputmask
+    addq %rcx, %rcx             # outputmask += outputmask
     jmp shiftloop
 shiftloop_return:
     rrmovq %rdi, %r14
     ret
 
+# Used for counting function calls during debugging
+count_function_calls:
+    irmovq $1, %rax
+    irmovq variable, %rbx
+    mrmovq (%rbx), %rcx
+    addq %rax, %rcx
+    rmmovq %rcx, (%rbx)
+    ret
+
 .pos 0x600
 pino:                       # stack address
+
+.pos 0x690
+variable:
 
 .pos 0x700
 .align 8
